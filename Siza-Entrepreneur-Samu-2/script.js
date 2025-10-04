@@ -228,197 +228,268 @@ document.addEventListener("DOMContentLoaded", () => {
   highlightCurrentNav(); // <-- independent of auth
 });
 
-// Message redaction utilities.
+// ===== Avatar dropdown =====
+window.avatarDropdown = function () {
+  const wrap = document.querySelector('[data-avatar-menu]');
+  if (!wrap) return;
+
+  const btn  = wrap.querySelector('.avatar-btn');
+  const menu = wrap.querySelector('.menu');
+
+  function close() {
+    wrap.classList.remove('open');
+    btn?.setAttribute('aria-expanded', 'false');
+  }
+
+  btn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const nowOpen = !wrap.classList.contains('open');
+    wrap.classList.toggle('open', nowOpen);
+    btn.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
+  });
+
+  document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+};
+
+// run it after the DOM is ready
+document.addEventListener('DOMContentLoaded', window.avatarDropdown);
+
+
+
 
 /* ==================================================================
    ENHANCED FILTERING WITH SEARCH FUNCTIONALITY
    ================================================================== */
-/* -------------------------
-   FILTER + SEARCH FOR INVESTOR DASHBOARD
--------------------------- */
 
-async function filterAndSearchPitches(selectedIndustries = [], searchTerm = "") {
+// Enhanced filtering function that handles both industry and search.
+async function filterAndSearchPitches(industry = "", searchTerm = "") {
+  console.log("Filtering by industry:", industry, "and searching for:", searchTerm);
+  
   const grid = document.getElementById("pitchGrid");
-  if (!grid) return;
+  if (!grid) {
+    console.error("pitchGrid element not found!");
+    return;
+  }
 
-  grid.innerHTML = `<div class="card">Loading pitches…</div>`;
+  // Show loading state.
+  grid.innerHTML = `<div class="card">Searching pitches…</div>`;
   
   try {
-    let snap;
-
-    // If "All" is selected or no industries checked, show all pitches
-    if (selectedIndustries.length === 0 || selectedIndustries.includes("All")) {
-      const qRef = query(collection(db, "testPitches"), orderBy("timestamp", "desc"));
-      snap = await getDocs(qRef);
-    } else {
-      const qRef = query(
+    let qRef;
+    
+    // First, get pitches filtered by industry (or all pitches)
+    if (industry && industry.trim() !== "") {
+      console.log("Creating filtered query for industry:", industry);
+      qRef = query(
         collection(db, "testPitches"),
-        where("industries", "array-contains-any", selectedIndustries),
+        where("industry", "==", industry.trim()),
         orderBy("timestamp", "desc")
       );
-      snap = await getDocs(qRef);
+    } else {
+      console.log("Creating query for all pitches");
+      qRef = query(
+        collection(db, "testPitches"), 
+        orderBy("timestamp", "desc")
+      );
     }
 
+    console.log("Executing query...");
+    const snap = await getDocs(qRef);
+    console.log("Query result:", snap.size, "documents");
+
     if (snap.empty) {
-      grid.innerHTML = `<div class="card">No pitches found.</div>`;
+      const message = industry ? `No pitches in "${industry}" found.` : "No pitches found.";
+      grid.innerHTML = `<div class="card">${message}</div>`;
       return;
     }
 
-    // Convert snapshot to array of pitches
+    // Convert to array for searching.
     let pitches = [];
-    snap.forEach(docSnap => {
-      pitches.push({ id: docSnap.id, data: docSnap.data() });
+    snap.forEach((docSnap) => {
+      pitches.push({
+        id: docSnap.id,
+        data: docSnap.data()
+      });
     });
 
-    // Apply search filter if search term exists
+    // Apply search filter if search term exists.
     if (searchTerm && searchTerm.trim() !== "") {
-      const searchLower = searchTerm.toLowerCase();
-      pitches = pitches.filter(({ data: p }) => {
-        const fields = [
-          p.title || p.pitchTitle || "",
-          p.shortPitch || p.description || "",
-          Array.isArray(p.industries) ? p.industries.join(" ") : (p.industry || ""),
-          p.financialProjections || p.projections || "",
-          p.businessModel || "",
-          p.targetMarket || "",
-          p.companyName || ""
-        ];
-        return fields.some(f => f.toLowerCase().includes(searchLower));
-      });
+      pitches = searchPitches(pitches, searchTerm.trim());
+      console.log("After search filtering:", pitches.length, "pitches remain");
     }
 
-    // Render pitches
+    // Display results.
+    if (pitches.length === 0) {
+      let message = "No pitches found";
+      if (industry && searchTerm) {
+        message = `No pitches in "${industry}" matching "${searchTerm}" found.`;
+      } else if (industry) {
+        message = `No pitches in "${industry}" found.`;
+      } else if (searchTerm) {
+        message = `No pitches matching "${searchTerm}" found.`;
+      }
+      grid.innerHTML = `<div class="card">${message}</div>`;
+      return;
+    }
+
+    // Clear grid and populate with results.
     grid.innerHTML = "";
+    let cardCount = 0;
+    
     pitches.forEach(({ id: pid, data: p }) => {
+      console.log("Processing pitch:", pid, p);
+      
       const title = p.title || p.pitchTitle || "Untitled Pitch";
-      const desc = p.shortPitch || p.description || "No description provided";
+      const desc = p.shortPitch || p.description || "No short description provided.";
       const fin = p.financialProjections || p.projections || "N/A";
-      const industries = Array.isArray(p.industries) ? p.industries.join(", ") : (p.industry || "Not specified");
+      const industries = p.industry || "Not specified";
 
       const card = document.createElement("div");
       card.className = "idea-card";
       card.innerHTML = `
         <h3>${escapeHtml(title)}</h3>
-        <p><strong>Industries:</strong> ${escapeHtml(industries)}</p>
+        <p><strong>Industry:</strong> ${escapeHtml(industries)}</p>
         <p><strong>Description:</strong> ${escapeHtml(desc)}</p>
         <p><strong>Financial Projections:</strong> ${escapeHtml(fin)}</p>
+        ${p.pitchDeck ? `<p><a class="btn" href="${p.pitchDeck}" target="_blank" rel="noopener">Open Deck</a></p>` : ""}
         <button class="btn view-pitch-btn" data-pitch-id="${pid}">View Pitch</button>
       `;
       grid.appendChild(card);
+      cardCount++;
     });
-
-    // Wire up View Pitch buttons
-    grid.querySelectorAll(".view-pitch-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
+    
+    console.log("Added", cardCount, "cards to grid");
+    
+    // Wire up the View Pitch buttons after rendering.
+    grid.querySelectorAll(".view-pitch-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
         const pitchId = btn.dataset.pitchId;
+        console.log("View pitch clicked:", pitchId);
         window.location.href = `pitch-details.html?id=${pitchId}`;
       });
     });
-//Render cards (after data is ready)
-    grid.innerHTML = "";
-    pitches.forEach(({ id: pid, data: p }) => {
-      grid.appendChild(createInvestorCard(pid, p)); // <- uses the video-in-square + amount pill card
-    });
 
-    // 6) If you gate with NDA, rebind modal here
-    if (typeof setupNDAModal === "function") setupNDAModal(grid);
   } catch (err) {
-    console.error(err);
-    grid.innerHTML = `<div class="card">Could not load pitches: ${err.message}</div>`;
+    console.error("Error filtering pitches:", err);
+    if (err.code === 'failed-precondition') {
+      grid.innerHTML = `<div class="card">Index is still building. Please wait a few minutes and try again.</div>`;
+    } else {
+      grid.innerHTML = `<div class="card">Failed to load pitches: ${err.message}</div>`;
+    }
   }
 }
 
-/* -------------------------
-   SETUP CHECKBOX FILTERS + SEARCH (Investor Dashboard)
--------------------------- */
-function setupFilters() {
-  const filterContainer = document.getElementById('industryFilters');
-  const checkboxes = filterContainer ? Array.from(filterContainer.querySelectorAll('input[type="checkbox"]')) : [];
-  const searchInput = document.getElementById('pitchSearch');
-  const pitchGrid = document.getElementById('pitchGrid');
+// Search function that looks through pitch content.
+function searchPitches(pitches, searchTerm) {
+  const searchLower = searchTerm.toLowerCase();
+  
+  return pitches.filter(({ data: pitch }) => {
+    // Define searchable fields.
+    const searchableFields = [
+      pitch.title || pitch.pitchTitle || "",
+      pitch.shortPitch || pitch.description || "",
+      pitch.industry || "",
+      pitch.financialProjections || pitch.projections || "",
+      pitch.businessModel || "",
+      pitch.targetMarket || "",
+      pitch.companyName || "",
+      // Add more fields as needed.
+    ];
+    
+    // Check if any field contains the search term.
+    return searchableFields.some(field => 
+      String(field).toLowerCase().includes(searchLower)
+    );
+  });
+}
 
-  // Debounce helper
+// Updated setup function with proper search handling.
+function setupFilters() {
+  console.log("Setting up filters and search...");
+  
+  const industryFilter = document.getElementById('industryFilter');
+  const searchInput = document.getElementById('pitchSearch');
+  
+  // Debounce helper: reduces the frequency of search calls while the user is typing.
   function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
       clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
+      timeout = setTimeout(later, wait);
     };
   }
-
-  // Get selected industries
-  function getSelectedIndustries() {
-    if (!checkboxes.length) return []; // No checkboxes on this page
-    const checked = checkboxes.filter(cb => cb.checked).map(cb => cb.value.trim());
-    if (checked.length === 0) {
-      const allCb = checkboxes.find(cb => cb.value === "All");
-      if (allCb) allCb.checked = true;
-      return ["All"];
-    }
-    return checked;
-  }
-
-  // Update the grid with current filters
-  function updateGrid() {
-    if (!pitchGrid) return; // Only update if grid exists
-    const selectedIndustries = getSelectedIndustries();
-    const searchTerm = searchInput ? searchInput.value.trim() : "";
-    filterAndSearchPitches(selectedIndustries, searchTerm);
-  }
-
-  // Debounced version to prevent rapid rebuilds
-  const debouncedUpdateGrid = debounce(updateGrid, 150);
-
-  // Checkbox change events
-  if (checkboxes.length) {
-    checkboxes.forEach(cb => {
-      cb.addEventListener('change', () => {
-        if (cb.value === "All" && cb.checked) {
-          // Uncheck all others if "All" selected
-          checkboxes.forEach(other => { if (other.value !== "All") other.checked = false; });
-        } else if (cb.value !== "All" && cb.checked) {
-          // Uncheck "All" if any other selected
-          const allCb = checkboxes.find(c => c.value === "All");
-          if (allCb) allCb.checked = false;
-        } else if (checkboxes.every(c => !c.checked)) {
-          // If all unchecked, select "All"
-          const allCb = checkboxes.find(c => c.value === "All");
-          if (allCb) allCb.checked = true;
-        }
-        debouncedUpdateGrid();
-      });
-    });
-  }
-
-  // Search input event
-  if (searchInput) {
-    searchInput.addEventListener('input', debouncedUpdateGrid);
-  }
-
-  // Initial grid load
-  if (pitchGrid) debouncedUpdateGrid();
-}
-
-/* -------------------------
-   CALL SETUP ON PAGE LOAD
--------------------------- */
-window.addEventListener('DOMContentLoaded', () => {
-  const hasFilters = document.getElementById('industryFilters');
-  const hasSearch = document.getElementById('pitchSearch');
   
-  if (hasFilters || hasSearch) {
-    setupFilters();
+  // Create debounced search function (waits 300ms after user stops typing)
+  const debouncedSearch = debounce(() => {
+    const currentIndustry = industryFilter ? industryFilter.value : '';
+    const currentSearch = searchInput ? searchInput.value : '';
+    filterAndSearchPitches(currentIndustry, currentSearch);
+  }, 300);
+  
+  if (industryFilter) {
+    console.log("Industry filter found, adding event listener");
+    industryFilter.addEventListener('change', function() {
+      console.log("Industry filter changed to:", this.value);
+      const currentSearch = searchInput ? searchInput.value : '';
+      filterAndSearchPitches(this.value, currentSearch);
+    });
+  } else {
+    console.warn("Industry filter element not found!");
   }
+  
+  if (searchInput) {
+    console.log("Search input found, adding event listener");
+    searchInput.addEventListener('input', function() {
+      console.log("Search input:", this.value);
+      debouncedSearch(); // Use debounced function
+    });
+  } else {
+    console.warn("Search input element not found!");
+  }
+  
+  // Initial data load: fetch everything before any filters/search is applied.
+  console.log("Loading initial pitches...");
+  filterAndSearchPitches('', '');
 }
-);
-/*=====SEE MORE/HIDE BUTTON=====*/ 
+
+function clearFilters() {
+  console.log("Clearing filters and search...");
+  
+  const industryFilter = document.getElementById('industryFilter');
+  const searchInput = document.getElementById('pitchSearch');
+  
+  if (industryFilter) industryFilter.value = '';
+  if (searchInput) searchInput.value = '';
+  
+  filterAndSearchPitches('', ''); // Show all pitches
+}
+
+// Keep your existing helper function.
+function escapeHtml(text) {
+  if (typeof text !== 'string') return text;
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// You can remove the old filterPitchesByIndustry function since we're replacing it.
+// with filterAndSearchPitches which handles both filtering and searching.
+/* ------------------------------------------------------------------
+   ==See More/Hide Button==
+   ------------------------------------------------------------------ */ 
 
 document.addEventListener('DOMContentLoaded', () => {
   const showMoreBtn = document.getElementById('showMoreBtn');
   const hideBtn = document.getElementById('hideBtn');
   const hiddenIndustries = document.querySelectorAll('#entIndustry .checkbox-item.hidden');
 
-  // Show hidden checkboxes
+  // Show hidden checkboxes.
   if (showMoreBtn && hiddenIndustries.length) {
     showMoreBtn.addEventListener('click', (e) => {
       e.preventDefault(); // ← Prevents form submission
@@ -428,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Hide checkboxes again
+  // Hide checkboxes again.
   if (hideBtn) {
     hideBtn.addEventListener('click', (e) => {
       e.preventDefault(); // ← Prevents form submission
@@ -440,37 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
-
-
-/* -------------------------
-   HTML ESCAPE HELPER
--------------------------- */
-function escapeHtml(text) {
-  if (typeof text !== 'string') return text;
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-
-/* -------------------------
-   CALL SETUP ON PAGE LOAD
--------------------------- */
-window.addEventListener('DOMContentLoaded', () => {
-  const hasFilters = document.getElementById('industryFilters');
-  const hasSearch = document.getElementById('pitchSearch');
-
-  // Only run setupFilters if the investor grid exists
-  if ((hasFilters || hasSearch) && document.getElementById('pitchGrid')) {
-    setupFilters();
-  }
-
-  // Load entrepreneur pitches if on entrepreneur dashboard
-  if (location.pathname.endsWith("entrepreneur-dashboard.html")) {
-    loadMyPitches();
-  }
-});
 
 
 /* ==================================================================
@@ -656,32 +696,7 @@ async function login(email, password) {
     window.location.href = "index.html";
   }
 
-  // Login form
-const loginForm = document.getElementById("loginForm");
-if (loginForm) {
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const emailEl = document.getElementById("loginEmail");
-    const passEl  = document.getElementById("loginPassword");
-    const email   = (emailEl?.value || "").trim();
-    const password= passEl?.value || "";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("Please enter a valid email address."); return; }
-    if (!password) { showToast("Password is required."); return; }
-    const userData = await login(email, password);
-    if (!userData) return; // stop on failed login
-    // ...redirects...
-  });
-} // no else/log
-
-// Google sign-in
-const googleSignInBtn = document.getElementById("googleSignInBtn");
-if (googleSignInBtn) {
-  googleSignInBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await signInWithGoogle();
-  });
-} // no else/log
-
+  
 
   return storeData;
 } catch (err) {
@@ -1802,32 +1817,6 @@ function updateNavForUser(u, optimistic = false) {
   if (typeof applyAvatarImages === "function") applyAvatarImages(u);
 }
 
-// ===== Avatar dropdown =====
-window.avatarDropdown = function () {
-  const wrap = document.querySelector('[data-avatar-menu]');
-  if (!wrap) return;
-
-  const btn  = wrap.querySelector('.avatar-btn');
-  const menu = wrap.querySelector('.menu');
-
-  function close() {
-    wrap.classList.remove('open');
-    btn?.setAttribute('aria-expanded', 'false');
-  }
-
-  btn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const nowOpen = !wrap.classList.contains('open');
-    wrap.classList.toggle('open', nowOpen);
-    btn.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
-  });
-
-  document.addEventListener('click', (e) => { if (!wrap.contains(e.target)) close(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-};
-
-// run it after the DOM is ready
-document.addEventListener('DOMContentLoaded', window.avatarDropdown);
 
 
 /* ==================================================================
@@ -1914,163 +1903,29 @@ function setupNDAModal(grid) {
   console.log("Setting up NDA modal");
   let selectedPitchId = null;
 
-  // ------- helpers -------
-  const toast = (m) => (window.showToast ? window.showToast(m) : alert(m));
-  function fieldError(el, msg) {
-    if (!el) return;
-    el.setAttribute("aria-invalid", "true");
-    const holder = el.closest(".field") || el.parentElement || el;
-    let err = holder.querySelector(".field-error");
-    if (!err) {
-      err = document.createElement("div");
-      err.className = "field-error";
-      Object.assign(err.style, { color:"#b00020", fontSize:"0.9rem", marginTop:"6px" });
-      holder.appendChild(err);
-    }
-    err.textContent = msg;
-  }
-  function clearFieldError(el) {
-    if (!el) return;
-    el.removeAttribute("aria-invalid");
-    const holder = el.closest(".field") || el.parentElement || el;
-    const err = holder && holder.querySelector(".field-error");
-    if (err) err.textContent = "";
-  }
-
-  // Robust signature check (works with plain <canvas> or SignaturePad)
-  function isCanvasSigned(canvas) {
-    try {
-      if (!canvas) return false;
-
-      // If you have a lib with isEmpty(), prefer that
-      if (window.signaturePad && typeof window.signaturePad.isEmpty === "function") {
-        return !window.signaturePad.isEmpty();
-      }
-
-      // Ensure canvas has a real drawing buffer (handle CSS scaling)
-      const w = canvas.width  || Math.round(canvas.getBoundingClientRect().width);
-      const h = canvas.height || Math.round(canvas.getBoundingClientRect().height);
-      if (!w || !h) return false;
-
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      if (!ctx) return false;
-
-      // If the canvas element's internal size is 0, try resizing snapshot
-      // (keeps UI intact; only for detection)
-      const tmp = document.createElement("canvas");
-      tmp.width = w; tmp.height = h;
-      const tctx = tmp.getContext("2d");
-      tctx.drawImage(canvas, 0, 0, w, h);
-
-      const { data } = tctx.getImageData(0, 0, w, h);
-      // Consider "signed" if any pixel is not fully transparent and not pure white
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-        if (a !== 0 && !(r === 255 && g === 255 && b === 255)) {
-          return true;
-        }
-      }
-      return false;
-    } catch {
-      // If anything goes wrong, fall back to data-signed flag
-      return !!(canvas && canvas.getAttribute && canvas.getAttribute("data-signed") && canvas.getAttribute("data-signed") !== "false");
-    }
-  }
-
-  // Validate full name + signature + checkbox inside modal
-  function validateNDA(modalRoot) {
-    const nameEl =
-      modalRoot.querySelector("#ndaFullName") ||
-      modalRoot.querySelector("#ndaName") ||
-      modalRoot.querySelector('input[name="ndaFullName"]') ||
-      modalRoot.querySelector('input[type="text"]');
-
-    const agreeEl =
-      modalRoot.querySelector("#ndaAgree") ||
-      modalRoot.querySelector('input[name="ndaAgree"]');
-
-    const sigCanvas =
-      modalRoot.querySelector("#ndaCanvas") ||
-      modalRoot.querySelector("#signaturePad") ||
-      modalRoot.querySelector("canvas");
-
-    let ok = true;
-
-    // Name required (min 2 chars)
-    const nameVal = String(nameEl?.value || "").trim();
-    clearFieldError(nameEl);
-    if (nameVal.length < 2) {
-      ok = false;
-      fieldError(nameEl, "Please type your full name.");
-    }
-
-    // Must tick checkbox if present
-    if (agreeEl) {
-      clearFieldError(agreeEl);
-      if (!agreeEl.checked) {
-        ok = false;
-        fieldError(agreeEl, "Please agree to the NDA to continue.");
-      }
-    }
-
-    // Signature required if a signature control exists
-    if (sigCanvas) {
-      const signed = isCanvasSigned(sigCanvas);
-      if (!signed) {
-        ok = false;
-        fieldError(sigCanvas, "Please draw your signature.");
-      } else {
-        clearFieldError(sigCanvas);
-      }
-    }
-
-    if (!ok) toast("Please complete all NDA fields.");
-    return ok;
-  }
-
-  // ------- Accept button (strict) -------
+  // Set up Accept button.
   const acceptBtn = document.getElementById("acceptNDA");
   if (acceptBtn) {
     // Remove old listeners.
     acceptBtn.replaceWith(acceptBtn.cloneNode(true));
     const newAcceptBtn = document.getElementById("acceptNDA");
-
-    newAcceptBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      if (!selectedPitchId) return;
-
-      // 1) Require full name + signature (+ checkbox)
-      if (!validateNDA(modal)) return;
-
-      // 2) Enforce investor daily limit (if guard is available)
-      if (typeof window.guardDailyPitchReviews === "function") {
-        const ok = await window.guardDailyPitchReviews(selectedPitchId);
-        if (!ok) return; // toast already shown
-      }
-
-      // 3) Persist NDA acceptance if your app exposes it
-      try {
-        if (typeof window.acceptNDA === "function") {
-          await window.acceptNDA(selectedPitchId);
-        }
-      } catch (err) {
-        console.error("[acceptNDA]", err);
-        toast("Could not record NDA acceptance. Please try again.");
-        return;
-      }
-
+    
+    newAcceptBtn.addEventListener("click", () => {
       console.log("NDA accepted for pitch:", selectedPitchId);
       modal.style.display = "none";
-      window.location.href = `pitch-details.html?id=${selectedPitchId}`;
+      if (selectedPitchId) {
+        window.location.href = `pitch-details.html?id=${selectedPitchId}`;
+      }
     });
   }
-
-  // ------- Decline button -------
+  
+  // Set up Decline button.
   const declineBtn = document.getElementById("declineNDA");
   if (declineBtn) {
+    // Remove old listeners.
     declineBtn.replaceWith(declineBtn.cloneNode(true));
     const newDeclineBtn = document.getElementById("declineNDA");
-
+    
     newDeclineBtn.addEventListener("click", () => {
       console.log("NDA declined");
       modal.style.display = "none";
@@ -2078,120 +1933,22 @@ function setupNDAModal(grid) {
     });
   }
 
-  // ------- View Pitch buttons -> open modal -------
+  // Set up View Pitch buttons.
   const viewButtons = grid.querySelectorAll(".view-pitch-btn");
   console.log("Found", viewButtons.length, "view pitch buttons");
-
+  
   viewButtons.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       selectedPitchId = btn.dataset.pitchId;
       console.log("Showing NDA modal for pitch:", selectedPitchId);
-      // Clear prior errors when reopening
-      modal.querySelectorAll(".field-error").forEach(el => (el.textContent = ""));
-      modal.querySelectorAll("[aria-invalid='true']").forEach(el => el.removeAttribute("aria-invalid"));
+      
       modal.style.display = "flex";
     });
   });
-
+  
   console.log("NDA modal setup complete");
 }
-
-/* ------------------------------------------------------------------
-   Investor daily full-pitch view limit (2/day) — global guard
-   Protects: clicks + location.assign/replace to pitch-details.html
-   ------------------------------------------------------------------ */
-(function installPitchViewLimit() {
-  if (window._pitchLimitInstalled) return;
-  window._pitchLimitInstalled = true;
-
-  if (typeof window.db !== "object") return; // Firebase not ready → no-op
-  const DAILY_LIMIT = 2;
-
-  function todayKey() {
-    const d = new Date();
-    return d.toISOString().slice(0, 10); // YYYY-MM-DD
-  }
-
-  async function getTodaysReviewCount(investorId) {
-    const qRef = query(
-      collection(db, "pitchReviews"),
-      where("investorId", "==", investorId),
-      where("day", "==", todayKey())
-    );
-    const snap = await getDocs(qRef);
-    return snap.size;
-  }
-
-  async function recordPitchReview(investorId, pitchId) {
-    await addDoc(collection(db, "pitchReviews"), {
-      investorId,
-      pitchId,
-      day: todayKey(),
-      at: serverTimestamp()
-    });
-  }
-
-  // Expose so NDA handler can call it too
-  window.guardDailyPitchReviews = async function(pitchId) {
-    try {
-      const user = (typeof getStoredUser === "function") ? getStoredUser() : null;
-      if (!user || String(user.accountType||"").toLowerCase() !== "investor") return true;
-      const count = await getTodaysReviewCount(user.id);
-      if (count >= DAILY_LIMIT) {
-        showToast(`Daily limit reached. You can view ${DAILY_LIMIT} full pitches per day.`);
-        return false;
-      }
-      await recordPitchReview(user.id, pitchId);
-      return true;
-    } catch (e) {
-      console.error("Pitch limit check failed:", e);
-      return true; // fail-open to avoid locking out users on transient errors
-    }
-  };
-
-  // Helper to extract id from a URL: .../pitch-details.html?id=XYZ
-  function getPitchIdFromHref(href) {
-    try {
-      const u = new URL(href, location.origin);
-      if (!/pitch-details\.html$/i.test(u.pathname)) return null;
-      return u.searchParams.get("id");
-    } catch { return null; }
-  }
-
-  // Intercept UI clicks to pitch-details links
-  document.addEventListener("click", async (e) => {
-    const link = e.target.closest("a[href]");
-    if (!link) return;
-    const pid = getPitchIdFromHref(link.getAttribute("href") || "");
-    if (!pid) return;
-    e.preventDefault();
-    const ok = await window.guardDailyPitchReviews(pid);
-    if (ok) window.location.href = link.href;
-  }, true);
-
-  // Intercept programmatic redirects
-  const _assign = window.location.assign.bind(window.location);
-  const _replace = window.location.replace.bind(window.location);
-  window.location.assign = async function(href) {
-    const pid = getPitchIdFromHref(String(href || ""));
-    if (pid) {
-      const ok = await window.guardDailyPitchReviews(pid);
-      if (!ok) return;
-    }
-    _assign(href);
-  };
-  window.location.replace = async function(href) {
-    const pid = getPitchIdFromHref(String(href || ""));
-    if (pid) {
-      const ok = await window.guardDailyPitchReviews(pid);
-      if (!ok) return;
-    }
-    _replace(href);
-  };
-})();
-
-
 
 /* ==================================================================
    Entrepreneur dashboard - Shows only YOUR pitches
@@ -3777,461 +3534,5 @@ onAuthStateChanged(auth, async (fbUser) => {
   });
 })();
 
-/* ========================================================================== 
-   MERGE BLOCK (paste at the very bottom of script.js)
-   - Non-invasive: only adds functions if they don't already exist.
-   - Adds samuscript helpers + daily investor pitch limit (2/day).
-   ========================================================================== */
 
-/* ---------- Safe toast fallback (uses your global if present) ---------- */
-(function ensureToast(){
-  if (typeof window.showToast === "function") return;
-  window.showToast = function(message, ms = 3200) {
-    let t = document.getElementById("inlineToast");
-    if (!t) {
-      t = document.createElement("div");
-      t.id = "inlineToast";
-      Object.assign(t.style, {
-        position:"fixed", left:"50%", top:"18px", transform:"translateX(-50%)",
-        background:"#111", color:"#fff", padding:"10px 14px", borderRadius:"10px",
-        zIndex:99999, boxShadow:"0 6px 18px rgba(0,0,0,.25)", maxWidth:"90vw", textAlign:"center",
-        fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif"
-      });
-      document.body.appendChild(t);
-    }
-    t.textContent = String(message || "Something went wrong. Please try again.");
-    t.style.display = "block";
-    clearTimeout(window.showToast._t);
-    window.showToast._t = setTimeout(() => (t.style.display = "none"), ms);
-  };
-})();
 
-/* ========================================================================== 
-   samuscript helpers (only added if missing)
-   ========================================================================== */
-
-// Parse YouTube URLs -> { id, start }
-if (typeof window.parseYouTube !== "function") {
-  window.parseYouTube = function(url){
-    try {
-      const u = new URL(String(url||"").trim());
-      let id = null, start = 0;
-      const t = u.searchParams.get("t") || u.searchParams.get("start");
-      if (t) {
-        const m = String(t).match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/);
-        start = m ? (Number(m[1]||0)*3600 + Number(m[2]||0)*60 + Number(m[3]||0)) : (Number(t)||0);
-      }
-      if (u.hostname.includes("youtu.be"))        id = u.pathname.split("/").filter(Boolean)[0];
-      else if (u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2] || u.pathname.split("/")[1];
-      else if (u.searchParams.get("v"))           id = u.searchParams.get("v");
-      else if (u.pathname.startsWith("/embed/"))  id = u.pathname.split("/")[2];
-      if (!id || id.length < 6) return null;
-      return { id, start };
-    } catch { return null; }
-  };
-}
-
-// Initials + currency helpers
-if (typeof window.initialsFromName !== "function") {
-  window.initialsFromName = function(name=""){
-    return name.trim().split(/\s+/).map(s=>s[0]).slice(0,2).join("").toUpperCase() || "S";
-  };
-}
-if (typeof window.formatZAR !== "function") {
-  window.formatZAR = function(n){
-    if (typeof n === "string") return n;
-    if (typeof n !== "number") return "";
-    if (n >= 1_000_000) return `R${(n/1_000_000).toFixed(1).replace(/\.0$/,"")}m`;
-    if (n >= 1_000)     return `R${(n/1_000).toFixed(0)}k`;
-    return `R${n}`;
-  };
-}
-
-// Build embed from a pitch record
-if (typeof window.toEmbedFromPitch !== "function") {
-  window.toEmbedFromPitch = function(p){
-    if (p?.video?.provider === "youtube" && p.video?.id) {
-      const qs = p.video.start ? `?start=${p.video.start}` : "";
-      return { kind:"yt", src:`https://www.youtube-nocookie.com/embed/${p.video.id}${qs}` };
-    }
-    if (p?.pitchVideo)  return { kind:"mp4", src:p.pitchVideo };
-    if (p?.videoUrl)    return { kind:"mp4", src:p.videoUrl };
-    if (p?.coverImage || p?.image || p?.imageUrl) return { kind:"img", src: p.coverImage || p.image || p.imageUrl };
-    return null;
-  };
-}
-
-// Render locked media thumbnail/initials
-if (typeof window.mountLockedMedia !== "function") {
-  window.mountLockedMedia = function(container, embed, initials="S"){
-    container.innerHTML = "";
-    const box = document.createElement("div");
-    box.className = "locked-media";
-    box.style.cssText = "position:relative;aspect-ratio:16/9;background:#0f172a;border-radius:16px;display:grid;place-items:center;overflow:hidden";
-    if (embed?.kind === "img") {
-      const img = new Image();
-      img.src = embed.src;
-      img.alt = "Cover image";
-      img.style.maxWidth = "100%";
-      img.style.maxHeight = "100%";
-      box.appendChild(img);
-    } else {
-      const badge = document.createElement("div");
-      badge.textContent = initials || "S";
-      badge.style.cssText = "width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:#1f2937;color:#fff;font-size:22px";
-      box.appendChild(badge);
-    }
-    const lock = document.createElement("div");
-    lock.textContent = "Preview locked — open pitch to view";
-    lock.style.cssText = "position:absolute;bottom:8px;left:8px;right:8px;background:rgba(15,23,42,.7);color:#e5e7eb;padding:6px 10px;border-radius:10px;font-size:12px";
-    box.appendChild(lock);
-    container.appendChild(box);
-  };
-}
-
-// Create slick investor card
-if (typeof window.createInvestorCard !== "function") {
-  window.createInvestorCard = function(pid, p){
-    const title    = p.title || p.pitchTitle || "Untitled Pitch";
-    const founder  = p.author || p.founderName || p.founder || "";
-    const industry = Array.isArray(p.industries) ? p.industries.join(", ") : (p.industry || "");
-    const desc     = p.shortPitch || p.description || "";
-    const amount   = p.fundingGoal || p.amount || p.raiseTarget || p.targetAmount || null;
-
-    const card = document.createElement("article");
-    card.className = "card";
-
-    const media = document.createElement("div");
-    media.className = "card-media";
-    const embed = window.toEmbedFromPitch(p);
-    const initials = (founder || title).split(/\s+/).map(s=>s[0]).slice(0,2).join("").toUpperCase();
-    window.mountLockedMedia(media, embed, initials);
-    card.appendChild(media);
-
-    const body = document.createElement("div");
-    body.className = "card-body";
-    body.innerHTML = `
-      <h3 class="card-title">${title}</h3>
-      <p class="card-sub">${industry || "&mdash;"}</p>
-      <p class="card-desc">${desc}</p>
-      <div class="card-actions">
-        ${amount ? `<span class="pill pill-amount">${window.formatZAR(Number(amount)||0)}</span>` : ""}
-        <button class="btn view-pitch-btn" data-pitch-id="${pid}">View Pitch</button>
-      </div>
-    `;
-    card.appendChild(body);
-    return card;
-  };
-}
-
-// Render entrepreneur’s own pitches (idempotent)
-if (typeof window.loadMyPitches !== "function") {
-  window.loadMyPitches = async function(){
-    const grid = document.getElementById("myPitchesGrid");
-    if (!grid) return;
-    grid.innerHTML = `<div class="card">Loading your pitches…</div>`;
-    try {
-      const user = (typeof getStoredUser === "function") ? getStoredUser() : null;
-      if (!user || !user.id) {
-        grid.innerHTML = `<div class="card">Could not identify user.</div>`;
-        return;
-      }
-      const qRef = query(
-        collection(db, "testPitches"),
-        where("entrepreneurID", "==", user.id),
-        orderBy("timestamp", "desc")
-      );
-      const snap = await getDocs(qRef);
-      if (snap.empty) {
-        grid.innerHTML = `<div class="card">You haven't submitted any pitches yet.</div>`;
-        return;
-      }
-      grid.innerHTML = "";
-      snap.forEach(docSnap => {
-        const p = docSnap.data();
-        const pid = docSnap.id;
-        grid.appendChild(window.createInvestorCard(pid, p));
-      });
-      grid.querySelectorAll(".view-pitch-btn").forEach(btn => {
-        btn.addEventListener("click", e => {
-          e.preventDefault();
-          const pitchId = btn.dataset.pitchId;
-          window.location.href = `pitch-details.html?id=${pitchId}`;
-        });
-      });
-    } catch (err) {
-      console.error("Error loading your pitches:", err);
-      grid.innerHTML = `<div class="card">Could not load your pitches: ${err.message}</div>`;
-    }
-  };
-}
-
-/* ========================================================================== 
-   Investor daily full-pitch view limit (2/day) — Firestore-backed
-   Intercepts:
-   - Clicks on .view-pitch-btn and <a href="pitch-details.html?id=...">
-   - Programmatic redirects via location.assign/replace
-   ========================================================================== */
-
-(function pitchViewLimit(){
-  // Needs Firebase globals (db, addDoc, collection, query, where, getDocs, serverTimestamp)
-  if (typeof window.db !== "object") return;
-
-  const DAILY_LIMIT = 2;
-
-  function todayKey() {
-    const d = new Date();
-    // YYYY-MM-DD (local)
-    return d.toISOString().slice(0,10);
-  }
-
-  async function getTodaysReviewCount(investorId) {
-    const qRef = query(
-      collection(db, "pitchReviews"),
-      where("investorId", "==", investorId),
-      where("day", "==", todayKey())
-    );
-    const snap = await getDocs(qRef);
-    return snap.size;
-  }
-
-  async function recordPitchReview(investorId, pitchId) {
-    await addDoc(collection(db, "pitchReviews"), {
-      investorId,
-      pitchId,
-      day: todayKey(),
-      at: serverTimestamp()
-    });
-  }
-
-  async function guardDailyPitchReviews(pitchId) {
-    try {
-      const user = (typeof getStoredUser === "function") ? getStoredUser() : null;
-      if (!user || String(user.accountType||"").toLowerCase() !== "investor") return true; // not an investor
-      const count = await getTodaysReviewCount(user.id);
-      if (count >= DAILY_LIMIT) {
-        showToast(`Daily limit reached. You can view ${DAILY_LIMIT} full pitches per day.`);
-        return false;
-      }
-      await recordPitchReview(user.id, pitchId);
-      return true;
-    } catch (e) {
-      console.error("Pitch limit check failed:", e);
-      // Fail-open so you don’t block legit users due to transient network issues
-      return true;
-    }
-  }
-
-  function getPitchIdFromHref(href){
-    try {
-      const u = new URL(href, location.origin);
-      if (!/pitch-details\.html$/i.test(u.pathname)) return null;
-      return u.searchParams.get("id");
-    } catch { return null; }
-  }
-
-  // Intercept UI clicks
-  document.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".view-pitch-btn");
-    const link = e.target.closest("a[href]");
-    let targetHref = null, pid = null;
-
-    if (btn && btn.dataset.pitchId) {
-      pid = btn.dataset.pitchId;
-      targetHref = `pitch-details.html?id=${pid}`;
-    } else if (link) {
-      targetHref = link.getAttribute("href");
-      pid = getPitchIdFromHref(targetHref);
-    }
-
-    if (!targetHref || !pid) return;
-
-    e.preventDefault();
-    const ok = await guardDailyPitchReviews(pid);
-    if (ok) window.location.href = targetHref;
-  }, true);
-
-  // Intercept programmatic redirects
-  const _assign = window.location.assign.bind(window.location);
-  const _replace = window.location.replace.bind(window.location);
-
-  window.location.assign = async function(href){
-    const pid = getPitchIdFromHref(String(href||""));
-    if (pid) {
-      const ok = await guardDailyPitchReviews(pid);
-      if (!ok) return;
-    }
-    _assign(href);
-  };
-  window.location.replace = async function(href){
-    const pid = getPitchIdFromHref(String(href||""));
-    if (pid) {
-      const ok = await guardDailyPitchReviews(pid);
-      if (!ok) return;
-    }
-    _replace(href);
-  };
-})();
-// --- Entrepreneur register wiring (non-invasive) ---
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("entrepreneurRegisterForm");
-  if (!form) return; // not on this page
-
-  const nameEl = document.getElementById("name");
-  const emailEl = document.getElementById("email");
-  const passEl  = document.getElementById("password");
-  const typeEl  = document.getElementById("accountType"); // hidden = "entrepreneur"
-
-  // Strong password: 8–128 chars, at least one letter, one number, one symbol
-  const PW_RULE = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,128}$/;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn = e.submitter || form.querySelector('button[type="submit"]');
-
-    const name = (nameEl?.value || "").trim();
-    const email = (emailEl?.value || "").trim();
-    const password = passEl?.value || "";
-    const accountType = (typeEl?.value || "entrepreneur").toLowerCase();
-
-    // Front-end validation (uses your isValidEmail from script.js)
-    if (!name || name.length < 2) {
-      showToast("Please enter your full name.");
-      nameEl?.focus();
-      return;
-    }
-    if (!isValidEmail(email)) {
-      showToast("Please enter a valid email address.");
-      emailEl?.focus();
-      return;
-    }
-    if (!PW_RULE.test(password)) {
-      showToast("Password must be 8–128 chars and include letters, a number, and a symbol.");
-      passEl?.focus();
-      return;
-    }
-
-    // Call your existing signup function (already defined in script.js)
-    await withButtonLoading(btn, async () => {
-      const user = await signup(email, password, name, accountType);
-      // signup() handles redirects; if it returns null, it already showed a toast
-      return user;
-    });
-  });
-});
-/* ------------------------------------------------------------
-   Wire up the "Submit a Pitch" form (idempotent + resilient)
-   - Works with #pitchForm or #submitPitchForm
-   - Collects title, short/long pitch, industries, goal
-   - Supports YouTube URL (ytUrl) and image input (pitchImage|pfImage|entPitchImage)
-   - Uses your existing submitPitch(data, files) writer
-   ------------------------------------------------------------ */
-(function wirePitchFormOnce() {
-  if (window._pitchFormWired) return;
-  window._pitchFormWired = true;
-
-  const $ = (id) => document.getElementById(id);
-  const el = (ids) => ids.map($).find(Boolean);
-
-  // Support both IDs people used in different pages
-  const form = $("pitchForm") || $("submitPitchForm");
-  if (!form) {
-    console.debug("[pitch] form not found (expected #pitchForm or #submitPitchForm).");
-    return;
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    // Button state helper
-    const btn = e.submitter || form.querySelector('button[type="submit"]');
-    const setBusy = (on) => {
-      if (!btn) return;
-      btn.disabled = !!on;
-      btn.dataset._orig = btn.dataset._orig || btn.textContent;
-      btn.textContent = on ? "Submitting…" : btn.dataset._orig;
-    };
-
-    // --- Gather inputs (be tolerant to alternate IDs) ---
-    const titleEl = $("pitchTitle") || $("title");
-    const shortEl = $("shortPitch") || $("summary");
-    const longEl  = $("description") || $("longPitch") || $("pitchDescription");
-    const projEl  = $("financialProjections") || $("projections");
-    const fundingEl = $("fundingGoal") || $("raiseTarget");
-
-    // Industries: either from checkbox grid (#entIndustry .checkbox-item.selected)
-    // or a single <select id="industry">
-    let industries = [];
-    const industrySelect = $("industry");
-    if (industrySelect && industrySelect.value) {
-      industries = [industrySelect.value.trim()];
-    } else {
-      const selected = document.querySelectorAll("#entIndustry .checkbox-item.selected");
-      industries = Array.from(selected).map(x => (x.dataset.value || x.textContent || "").trim()).filter(Boolean);
-    }
-
-    const data = {
-      title: (titleEl?.value || "").trim(),
-      shortPitch: (shortEl?.value || "").trim(),
-      description: (longEl?.value || "").trim(),
-      financialProjections: (projEl?.value || "").trim(),
-      industries,                     // store array
-      fundingGoal: (fundingEl?.value || "").trim(),
-    };
-
-    // Basic validation (friendly + minimal)
-    if (!data.title)  { (window.showToast||alert)("Please add a pitch title."); return; }
-    if (!data.description) { (window.showToast||alert)("Please add a detailed description."); return; }
-    if (!data.shortPitch) data.shortPitch = "—";
-
-    // Optional YouTube parsing
-    const ytVal = ( $("ytUrl")?.value || "" ).trim();
-    if (ytVal && typeof window.parseYouTube === "function") {
-      const parsed = window.parseYouTube(ytVal);
-      if (parsed) {
-        data.video = {
-          provider: "youtube",
-          id: parsed.id,
-          start: parsed.start || 0,
-          url: ytVal
-        };
-      }
-    }
-
-    // Optional image
-    const imageIn = el(["pitchImage","pfImage","entPitchImage"]);
-    const files = { image: imageIn?.files?.[0] || null };
-
-    try {
-      setBusy(true);
-      // Prefer your withButtonLoading helper if present
-      if (typeof window.withButtonLoading === "function") {
-        await withButtonLoading(btn, () => submitPitch(data, files));
-      } else {
-        await submitPitch(data, files);
-      }
-
-      // Success UX
-      (window.showToast||alert)("Pitch submitted successfully!");
-      form.reset();
-      // clear any “selected” tags
-      document.querySelectorAll("#entIndustry .checkbox-item.selected")
-        .forEach(n => n.classList.remove("selected"));
-
-      // If you have a success page, redirect:
-      if (location.pathname.endsWith("submit-pitch.html") || location.pathname.endsWith("entrepreneur-dashboard.html")) {
-        try { window.location.href = "pitch-success.html"; } catch {}
-      }
-
-      // If a grid is present on the page, refresh it
-      if (document.getElementById("pitchGrid") && typeof window.loadPitchesIntoGrid === "function") {
-        await window.loadPitchesIntoGrid();
-      }
-    } catch (err) {
-      console.error("[pitch] submit failed:", err);
-      (window.showToast||alert)("Could not submit pitch: " + (err?.message || err));
-    } finally {
-      setBusy(false);
-    }
-  });
-})();
