@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siza - Investor Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+  :root{
+    --brand-600:#0A66C2;
+    --brand-700:#084e93;
+    --ink:#0b1f33;
+    --muted:#6b7280;
+    --border:#e6e9ef;
+    --card:#ffffff;
+    --bg:#f3f6f9;
+  }
+  /* Font + base color (safe if already set elsewhere) */
+  body{ font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color:var(--ink); }
+
+  /* Modal shell */
+  #ndaModal.modal{
+    position: fixed; inset: 0;
+    display:none; justify-content:center; align-items:center;
+    background: rgba(11,31,51,.55);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+  }
+  #ndaModal .modal-content{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(11,31,51,.18);
+    width: min(520px, 92vw);
+    padding: 1.25rem 1.25rem 1rem;
+    text-align: left;
+  }
+  #ndaModal h3{
+    margin: 0 0 .25rem 0; font-size:1.25rem; line-height:1.2; font-weight:700; color:var(--ink);
+  }
+  #ndaModal hr{ height:1px; border:0; background:var(--border); margin:.75rem 0 1rem; }
+  #ndaModal p{ margin:.5rem 0; line-height:1.55; color:var(--ink); }
+  #ndaModal .muted{ color:var(--muted); }
+
+  /* Inputs */
+  #ndaModal label{ display:block; font-weight:600; margin:.75rem 0 .35rem; }
+  #ndaModal .large-textbox{
+    width:100%; padding:.7rem .9rem;
+    border:1px solid var(--border); border-radius:10px; background:#fff; color:var(--ink);
+    font:inherit; outline:none; transition:border-color .15s, box-shadow .15s;
+  }
+  #ndaModal .large-textbox::placeholder{ color:#9aa3af; }
+  #ndaModal .large-textbox:focus{ border-color:var(--brand-600); box-shadow:0 0 0 3px rgba(10,102,194,.15); }
+
+  /* Signature */
+  #ndaModal .sig-wrap{ margin:12px 0; }
+  #ndaModal .sig-pad canvas{
+    width:100%; height:90px; display:block;
+    border:1px solid var(--border); border-radius:10px; background:#fff;
+  }
+  #ndaModal .sig-tools{ margin-top:6px; display:flex; gap:.5rem; }
+
+  /* Buttons — BOTH same brand color */
+  #ndaModal .modal-actions{
+    margin-top:1rem; display:flex; gap:.75rem; justify-content:flex-end; flex-wrap:wrap;
+  }
+  #ndaModal .btn{
+    background: var(--brand-600); color:#fff;
+    border:1px solid var(--brand-600);
+    border-radius:10px; font-weight:600; padding:.6rem 1rem; min-width:120px;
+    box-shadow: 0 1px 0 rgba(8,78,147,.25);
+    cursor:pointer; transition: background-color .15s, border-color .15s, transform .02s;
+  }
+  #ndaModal .btn:hover{ background:var(--brand-700); border-color:var(--brand-700); }
+  #ndaModal .btn:active{ transform: translateY(1px); }
+  #ndaModal .btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(10,102,194,.2); }
+  #ndaModal #acceptNDA:disabled{
+    background:#ccdef3; border-color:#ccdef3; color:#eef6ff; cursor:not-allowed; box-shadow:none;
+  }
+/* Smaller NDA modal frame */
+#ndaModal .modal-content{
+  max-width: 2-0px;      /* was 500px → smaller frame */
+  width: min(82vw, 260px);
+  padding: 12px 14px;    /* optional tighter padding */
+  border-radius: 12px;   /* optional */
+}
+
+  </style>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+<section class="dashboard-section">
+  <div class="container">
+    <h2>Welcome, <span id="username">Investor</span></h2>
+    
+    <!-- FILTER + SEARCH -->
+    <div class="filter-bar">
+      <!-- Search input -->
+      <input id="pitchSearch" type="text" placeholder="Search Ideas..." />
+
+
+  <div id="industryFilters" class="industry-checkboxes">
+    <label><input type="checkbox" value="All" checked> All Industries</label>
+    <label><input type="checkbox" value="Technology"> Technology</label>
+    <label><input type="checkbox" value="Fintech"> Fintech</label>
+    <label><input type="checkbox" value="Health & Wellness"> Health & Wellness</label>
+    <label><input type="checkbox" value="Biotech / Life Sciences"> Biotech / Life Sciences</label>
+    <label><input type="checkbox" value="Education"> Education</label>
+    <label><input type="checkbox" value="E-commerce & Retail"> E-commerce & Retail</label>
+    <label><input type="checkbox" value="Food & Beverage"> Food & Beverage</label>
+    <label><input type="checkbox" value="Agriculture & Agritech"> Agriculture & Agritech</label>
+    <label><input type="checkbox" value="Energy & CleanTech"> Energy & CleanTech</label>
+    <label><input type="checkbox" value="Real Estate & PropTech"> Real Estate & PropTech</label>
+  </div>
+</div>
+
+   
+<div id="pitchGridWrapper">
+  <div class="card-grid" id="pitchGrid">
+    <!-- Pitches will be loaded here by JavaScript -->
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+<!-- NDA Modal - IMPORTANT: This must be here -->
+<div id="ndaModal" class="modal">
+  <div class="modal-content">
+    <h3>Non-Disclosure Agreement</h3>
+    <hr>
+
+    <div>
+      <p><b>Please read the following statement carefully and acknowledge that you have read and approved it by providing your details below.</b></p>
+      <p>By proceeding, you agree not to copy, share, or distribute any part of this pitch without explicit permission from the entrepreneur.</p>
+      <p><b>NB:</b> An e-Signature is the electronic equivalent of a handwritten signature. Individuals who fail to comply may be held legally liable.</p>
+
+      <label for="ndaFullName">Full name &amp; surname</label>
+      <input id="ndaFullName" type="text" class="large-textbox" placeholder="Type your name here" autocomplete="name" required>
+
+      <div class="sig-wrap">
+        <label>Draw your signature</label>
+        <div class="sig-pad">
+          <canvas id="sigCanvas" aria-label="Signature pad"></canvas>
+          <div class="sig-tools">
+            <button type="button" class="btn secondary" id="sigClear">Clear</button>
+          </div>
+        </div>
+        <p class="muted">Tip: use your mouse or finger/stylus.</p>
+        <input type="hidden" id="sigData" name="sigData" />
+      </div>
+
+      <p class="muted" style="margin-top:.5rem;">Do you accept the terms of this NDA?</p>
+    </div>
+
+    <div class="modal-actions">
+       <button id="acceptNDA" class="btn">I Accept</button>
+      <button id="declineNDA" class="btn secondary">Cancel</button>
+     
+    </div>
+  </div>
+</div>
+
+
+<!-- Load your unified Firebase/app logic -->
+<script type="module" src="script.js"></script>
+<script>
+(function(){
+  const modal   = document.getElementById('ndaModal');
+  const canvas  = document.getElementById('sigCanvas');
+  const clear   = document.getElementById('sigClear');
+  const sigData = document.getElementById('sigData');
+  const accept  = document.getElementById('acceptNDA');
+
+  if (!canvas || !accept) return;
+
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+
+  function fit(){
+    // size backing store to display size for crisp lines
+    const rect = canvas.getBoundingClientRect();
+    const dpr  = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width  = Math.max(1, Math.round(rect.width  * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = '#111827';
+  }
+
+  function pos(e){
+    const r = canvas.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return { x: p.clientX - r.left, y: p.clientY - r.top };
+  }
+
+  function down(e){ e.preventDefault(); drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+  function move(e){ if(!drawing) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); }
+  function up(){ if(!drawing) return; drawing = false; try { sigData.value = canvas.toDataURL('image/png'); } catch {} }
+
+  // pointer + touch
+  canvas.addEventListener('pointerdown', down);
+  canvas.addEventListener('pointermove', move);
+  window.addEventListener('pointerup',   up);
+  canvas.addEventListener('touchstart',  down, {passive:false});
+  canvas.addEventListener('touchmove',   move, {passive:false});
+  canvas.addEventListener('touchend',    up);
+
+  clear?.addEventListener('click', () => {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    sigData.value = '';
+  });
+
+  // Make sure the pad sizes correctly when the modal opens
+  window.refreshSigPad = fit; // if you call this elsewhere, it’ll work
+  new ResizeObserver(fit).observe(canvas);
+  requestAnimationFrame(fit);
+
+  // Ensure the signature is saved right before your existing Accept handler runs.
+  // (capture: true makes this run first; we don't preventDefault, so your original flow continues)
+  accept.addEventListener('click', () => {
+    try {
+      if (!sigData.value) sigData.value = canvas.toDataURL('image/png');
+      // Optional: if you already have a saver, fire-and-forget.
+      if (typeof window.onNDASigned === 'function') {
+        window.onNDASigned({ signatureDataURL: sigData.value });
+      }
+    } catch {}
+  }, { capture: true });
+})();
+</script>
+
+
+<!-- Small chat helpers -->
+<script>
+  function toggleChat() {
+    const chatBox = document.getElementById('chatBox');
+    if (chatBox) {
+      chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+    }
+  }
+  function sendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    if (input) {
+      const messageText = input.value.trim();
+      if (messageText !== '') {
+        const chatMessages = document.querySelector('.chat-messages');
+        if (chatMessages) {
+          const newMessage = document.createElement('div');
+          newMessage.classList.add('message', 'me');
+          newMessage.innerHTML = `<strong>You:</strong><p>${messageText}</p>`;
+          chatMessages.appendChild(newMessage);
+          input.value = '';
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }
+    }
+  }
+</script>
+</body>
+<script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>

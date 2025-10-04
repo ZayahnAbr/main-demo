@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entrepreneur Guidelines - Siza</title>
+
+  <!-- Your site styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Match your dashboard button styles -->
+  <style>
+    .btn.primary   { background:#5b84a1; color:#fff; border:none; padding:.7rem 1.1rem; border-radius:8px; font-weight:700; }
+    .btn.secondary { background:#4795fc; color:#fcfdfd; border:none; padding:.7rem 1.1rem; border-radius:8px; font-weight:700; text-decoration:none; }
+
+    /* Minimal layout helpers if not defined in style.css */
+    :root{ --brand:#111; --muted:#666; --card:#fff; --bg:#fafafa; --border:#eaeaea; }
+    html,body{margin:0;height:100%;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#111}
+    .container{max-width:1100px;margin:0 auto;padding:0 16px}
+    header{border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:10}
+    .header-row{display:flex;align-items:center;justify-content:space-between;height:64px}
+    .brand{font-weight:800}
+    .site-nav ul{display:flex;gap:14px;list-style:none;padding:0;margin:0}
+    .site-nav .right{align-items:center}
+    .nav-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.04)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer}
+
+    /* ======= Guided Tour styles (self-contained) ======= */
+    .tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:saturate(80%) blur(1px);display:none;z-index:999}
+    .tour-overlay.is-open{display:block}
+    .tour-highlight{position:absolute;border:2px solid #4f9cff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);transition:all .25s ease;background:rgba(255,255,255,.02)}
+    .tour-pulse{position:absolute;border:2px solid #4f9cff;border-radius:12px;pointer-events:none}
+    .tour-pulse::after{content:"";position:absolute;inset:-6px;border:2px solid #4f9cff;border-radius:14px;animation:pulse 1.6s ease-out infinite}
+    @keyframes pulse{0%{opacity:.8;transform:scale(.98)}100%{opacity:0;transform:scale(1.1)}}
+    .tour-tooltip{position:absolute;max-width:min(420px,90vw);background:#fff;color:#111;border-radius:14px;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,.25);padding:14px}
+    .tour-tooltip header{display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem}
+    .tour-step{font-size:.8rem;color:var(--muted)}
+    .tour-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem}
+    .tour-arrow{position:absolute;width:16px;height:16px;background:#fff;border-left:1px solid var(--border);border-top:1px solid var(--border);transform:rotate(45deg)}
+    .tour-controls-fixed{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;display:flex;align-items:center;gap:.5rem;z-index:1000}
+    .tour-progress{font-size:.85rem;color:#fff;background:rgba(0,0,0,.45);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.2)}
+    .muted{color:#666}
+  </style>
+</head>
+<body>
+<main>
+  <section class="container" style="padding:2rem 0;">
+    <div class="card" style="padding:1.5rem;position:relative;">
+      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+        <h2 id="pdTitle">Lile Oils – Cold-Pressed Essential Oils</h2>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <button id="viewGuidelines" class="btn secondary">📘 Guidelines</button>
+        </div>
+      </div>
+
+      <p><strong>Entrepreneur:</strong> <span id="pdAuthor">Pitch Example</span>
+         
+      <h3 style="margin-top:1.5rem;">Overview</h3>
+      <p id="pdDesc">We produce premium cold-pressed essential oils for wellness and cosmetics. Pilots with 12 spas; 3 retail trials. Seeking seed to expand production and distribution.</p>
+
+      <div id="pdStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem;">
+        <div class="card" id="cardIndustry" style="padding:1rem;">
+          <strong>Industry</strong>
+          <div id="pdIndustry">Consumer / Beauty</div>
+        </div>
+        <div class="card" id="cardFunding" style="padding:1rem;">
+          <strong>Funding Goal</strong>
+          <div id="pdFunding">R2.5m</div>
+        </div>
+        <div class="card" id="cardProj" style="padding:1rem;">
+          <strong>Financial Projections</strong>
+          <div id="pdProjections">12-month revenue R4.2m; GM 55%; runway 14 mo.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;">
+        <strong>Pitch Deck:</strong> <span id="pdDeck"><a href="#">LileOils_Deck.pdf</a></span>
+      </div>
+
+      <div id="pdVideoWrap" style="margin-top:1.5rem;">
+        <h3>Pitch Video</h3>
+        <video controls width="100%">
+          <source id="pdVideoSrc" src="" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <p class="muted" id="videoHint">Upload a short (30–90s) demo or founder intro.</p>
+      </div>
+
+      <div style="margin-top:1.5rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <div id="contactBtnContainer"><button class="btn secondary">Contact Entrepreneur</button></div>
+        <a class="btn secondary" href="entrepreneur-dashboard.html">Back to Dashboard</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+
+<!-- ======== TOUR OVERLAY (in-page) ======== -->
+<div class="tour-overlay" id="tourOverlay" aria-hidden="true">
+  <div class="tour-highlight" id="tourHighlight" aria-hidden="true"></div>
+  <div class="tour-pulse" id="tourPulse" aria-hidden="true"></div>
+  <div class="tour-tooltip" id="tourTooltip" role="dialog" aria-modal="true"
+       aria-labelledby="tourTitle" aria-describedby="tourBody" style="display:none;">
+    <div class="tour-arrow" id="tourArrow" aria-hidden="true"></div>
+    <header>
+      <div style="font-weight:700" id="tourTitle">Title</div>
+      <div class="tour-step" id="tourStep">Step 1 of N</div>
+    </header>
+    <div id="tourBody" class="muted">Body</div>
+    <div class="tour-actions">
+      <button class="btn secondary" id="tourPrev">Previous</button>
+      <button class="btn secondary" id="tourNext">Next</button>
+      <button class="btn primary"   id="tourDone">Done</button>
+    </div>
+  </div>
+  <div class="tour-controls-fixed" id="tourFixed" style="display:none;">
+    <span class="tour-progress" id="tourProgress">1 / N</span>
+  </div>
+</div>
+
+<script>
+  // Manual triggers (optional)
+  document.getElementById('viewGuidelines').addEventListener('click', (e)=>{
+    e.preventDefault(); startTour({auto:true});
+  });
+  document.getElementById('startTour').addEventListener('click', ()=> startTour());
+
+  // ======= Guided Tour Engine =======
+  function startTour(opts={}){
+    const steps = [
+      { selector:'#pdTitle',       title:'Pitch Title',           body:'Use a clear, specific title: Brand + what you do. This appears in investor lists & search.', prefer:'bottom' },
+      { selector:'#pdDesc',        title:'Overview',              body:'Summarise problem → solution → ICP → traction in 3–5 sentences. Include concrete metrics.', prefer:'right' },
+      { selector:'#cardIndustry',  title:'Industry & CheckBox',       body:'Pick the closest industry. On submission, add 3–10 checkbox like #beauty #wellness for matching.', prefer:'top' },
+      { selector:'#cardProj',      title:'Financial Projections', body:'Show 12–24-month revenue, GM%, runway, assumptions. Put sensitive details behind NDA uploads.', prefer:'left' },
+      { selector:'#pdDeck',        title:'Pitch Deck',            body:'Upload a clean 10–12 slide PDF. First 5: Problem, Solution, Market, Traction, Business Model.', prefer:'top' },
+      { selector:'#pdVideoWrap',   title:'Optional Video',        body:'Add a 30–90s demo or founder intro. Keep it simple; landscape is best.', prefer:'top' },
+      { selector:'#contactBtnContainer', title:'Engage',          body:'Investors contact you here. Keep your inbox monitored & reply promptly.', prefer:'top' }
+    ];
+
+    const overlay  = document.getElementById('tourOverlay');
+    const highlight= document.getElementById('tourHighlight');
+    const pulse    = document.getElementById('tourPulse');
+    const tip      = document.getElementById('tourTooltip');
+    const arrow    = document.getElementById('tourArrow');
+    const tTitle   = document.getElementById('tourTitle');
+    const tBody    = document.getElementById('tourBody');
+    const tStep    = document.getElementById('tourStep');
+    const progress = document.getElementById('tourProgress');
+    const btnPrev  = document.getElementById('tourPrev');
+    const btnNext  = document.getElementById('tourNext');
+    const btnDone  = document.getElementById('tourDone');
+    const fixed    = document.getElementById('tourFixed');
+
+    let i = 0;
+    const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+
+    function open(){
+      overlay.classList.add('is-open');
+      overlay.setAttribute('aria-hidden','false');
+      tip.style.display='block'; fixed.style.display='flex';
+      document.body.style.overflow='hidden';
+      render();
+    }
+    function close(){
+      overlay.classList.remove('is-open');
+      overlay.setAttribute('aria-hidden','true');
+      tip.style.display='none'; fixed.style.display='none';
+      document.body.style.overflow='';
+    }
+    function positionAround(target, prefer){
+      const rect = target.getBoundingClientRect();
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const scrollX = window.scrollX || document.documentElement.scrollLeft;
+      const pad=10, x=rect.left+scrollX-pad, y=rect.top+scrollY-pad, w=rect.width+pad*2, h=rect.height+pad*2;
+      Object.assign(highlight.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
+      Object.assign(pulse.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
+
+      // auto-scroll
+      const vt = window.scrollY, vb = vt + window.innerHeight, mid = y + h/2;
+      if(mid < vt + 100 || mid > vb - 100){ window.scrollTo({top: clamp(y - 120, 0, document.body.scrollHeight), behavior:'smooth'}); }
+
+      // tooltip
+      const tipRect={w: tip.offsetWidth||360, h: tip.offsetHeight||160};
+      const gap=12; let pos=prefer||'bottom', top, left;
+      if(pos==='bottom'){ top=y+h+gap; left=x; arrow.style.top=(y+h+2)+'px'; arrow.style.left=(x+16)+'px'; }
+      if(pos==='top'){    top=y-tipRect.h-gap; left=x; arrow.style.top=(y-10)+'px'; arrow.style.left=(x+16)+'px'; }
+      if(pos==='right'){  top=y; left=x+w+gap; arrow.style.top=(y+16)+'px'; arrow.style.left=(x+w+2)+'px'; }
+      if(pos==='left'){   top=y; left=x-tipRect.w-gap; arrow.style.top=(y+16)+'px'; arrow.style.left=(x-10)+'px'; }
+      left = clamp(left, scrollX+8, scrollX+window.innerWidth-(tipRect.w+8));
+      if(top < scrollY+8) top = y + h + gap;
+      Object.assign(tip.style,{top:top+'px',left:left+'px'});
+      if(pos==='bottom') arrow.style.transform='rotate(45deg)';
+      if(pos==='top')    arrow.style.transform='rotate(225deg)';
+      if(pos==='right')  arrow.style.transform='rotate(135deg)';
+      if(pos==='left')   arrow.style.transform='rotate(-45deg)';
+    }
+    function render(){
+      const step = steps[i], el = document.querySelector(step.selector);
+      tTitle.textContent = step.title || 'Step';
+      tBody.textContent  = step.body || '';
+      tStep.textContent  = `Step ${i+1} of ${steps.length}`;
+      progress.textContent = `${i+1} / ${steps.length}`;
+      btnPrev.disabled = i===0;
+      btnNext.style.display = i<steps.length-1 ? 'inline-flex' : 'none';
+      btnDone.style.display = i===steps.length-1 ? 'inline-flex' : 'none';
+      if(el) positionAround(el, step.prefer);
+    }
+    // controls
+    btnPrev.onclick = ()=>{ if(i>0){ i--; render(); } };
+    btnNext.onclick = ()=>{ if(i<steps.length-1){ i++; render(); } };
+    btnDone.onclick = ()=>{ close(); window.location.href = 'entrepreneur-dashboard.html'; }; // redirect back to dashboard when done
+    document.getElementById('tourOverlay').addEventListener('click',(e)=>{
+      const withinTip = e.target.closest('#tourTooltip');
+      const withinHl  = e.target.closest('#tourHighlight');
+      if(!withinTip && !withinHl){ close(); window.location.href = 'entrepreneur-dashboard.html'; }
+    });
+    document.addEventListener('keydown',(e)=>{
+      const openState = document.getElementById('tourOverlay').classList.contains('is-open');
+      if(!openState) return;
+      if(e.key==='Escape'){ close(); window.location.href = 'entrepreneur-dashboard.html'; }
+      if(e.key==='ArrowRight') btnNext.click();
+      if(e.key==='ArrowLeft')  btnPrev.click();
+    });
+
+    open();
+  }
+
+  // Auto-start the tour when the page loads so it's immediately playable
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof startTour === 'function') startTour({ auto: true });
+  });
+</script>
+</body>
+</html>

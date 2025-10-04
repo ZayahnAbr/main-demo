@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Forum - Siza</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+<div class="forum-container">
+  <h2>Community Forum</h2>
+  
+  <!-- Create New Post Button -->
+  <button id="createPostBtn" class="btn">Create New Post</button>
+  
+  <!-- Posts will be loaded here -->
+  <div id="postsContainer">
+    <p>Loading forum posts...</p>
+  </div>
+</div>
+
+<!-- Create Post Modal -->
+<div id="createPostModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;">
+  <div style="background: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 600px;">
+    <h3>Create New Post</h3>
+    <form id="createPostForm">
+      <input type="text" id="postTitle" placeholder="Post Title" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+      <textarea id="postContent" placeholder="What's on your mind?" required style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; height: 150px;"></textarea>
+      <button type="submit" class="btn">Post</button>
+      <button type="button" onclick="document.getElementById('createPostModal').style.display = 'none'" class="btn" style="background: #dbecfb;">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+ <script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>

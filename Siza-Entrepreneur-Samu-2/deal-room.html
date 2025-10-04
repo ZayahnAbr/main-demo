@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Deal Room - Siza</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+<section class="container" style="padding:2rem 0;">
+  <h2>Deal Room (Beta)</h2>
+  <p>Start a video call and share the Room ID with the other person, or join an existing room.</p>
+
+  <div style="display:grid; gap:1rem; grid-template-columns: 1fr; max-width:900px;">
+    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+      <button id="btnCreate" class="btn">Create Room</button>
+      <input id="roomId" type="text" placeholder="Room ID" style="flex:1; min-width:220px; padding:.6rem; border:1px solid #ccc; border-radius:6px;" />
+      <button id="btnJoin" class="btn">Join Room</button>
+      <button id="btnHangup" class="btn" style="background:#ef4444; color:#fff;">Hang Up</button>
+      <button id="btnShare" class="btn" title="Share your screen (optional)">Share Screen</button>
+    </div>
+
+    <div style="display:grid; gap:1rem; grid-template-columns: 1fr 1fr;">
+      <div class="card">
+        <h3 style="margin-bottom:.5rem;">You</h3>
+        <video id="localVideo" playsinline autoplay muted style="width:100%; background:#000; border-radius:8px;"></video>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:.5rem;">Partner</h3>
+        <video id="remoteVideo" playsinline autoplay style="width:100%; background:#000; border-radius:8px;"></video>
+      </div>
+    </div>
+
+    <small id="roomHint" style="color:#555;"></small>
+  </div>
+</section>
+
+<!-- Make sure your global script is loaded as module so Firebase imports work -->
+<script type="module" src="script.js"></script>
+
+ <script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siza - Pitch Details</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+<section class="container" style="padding:2rem 0;">
+  <div class="card" style="padding:1.5rem;">
+    <h2 id="pdTitle">Loading…</h2>
+    <p><strong>Entrepreneur:</strong> <span id="pdAuthor">—</span> 
+
+    <h3 style="margin-top:1.5rem;">Overview</h3>
+    <p id="pdDesc">—</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem;">
+      <div class="card">
+        <strong>Industry</strong>
+        <div id="pdIndustry">—</div>
+      </div>
+    </div>
+    <div class ="card">
+      <strong>Detailed Description</strong>
+      <div id="pdDescription">-</div>
+    </div>
+    <div class="card">
+  <strong>Financial Projections (ZAR)</strong>
+  <div id="pdProjections">—</div>
+</div>
+
+
+    <!-- Video wrapper (the function will inject the iframe here) -->
+<div id="pdVideoWrap" style="display:none;">
+  <!-- Optional file video fallback element if you still support uploaded videos: -->
+  <video id="pdVideoSrc" controls style="max-width:100%; display:none;"></video>
+</div>
+
+    <div style="margin-top:1.5rem;">
+      <div id="contactBtnContainer"></div>
+      <!--<button id="contactEntrepreneur" class="btn">Contact Entrepreneur</button>-->
+      <a id="backDashboardBtn" class="btn" href="investor-dashboard.html">Back to Dashboard</a>
+
+    </div>
+  </div>
+</section>
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="script.js"></script>
+</body><script>
+(() => {
+  const modal        = document.getElementById('ndaModal');
+  const canvas       = document.getElementById('sigCanvas');
+  const undoBtn      = document.getElementById('sigUndo');
+  const clearBtn     = document.getElementById('sigClear');
+  const acceptBtn    = document.getElementById('acceptNDA');
+  const declineBtn   = document.getElementById('declineNDA');
+  const nameInput    = document.getElementById('ndaFullName');
+  const sigDataInput = document.getElementById('sigData');
+
+  if (!canvas) return; // safety
+
+  // Drawing state
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  let currentStroke = [];
+  let strokes = [];
+
+  // Scale the canvas for crisp lines on high-DPI screens
+  function fitCanvas() {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const css = canvas.getBoundingClientRect();
+    canvas.width  = Math.round(css.width * dpr);
+    canvas.height = Math.round(css.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // scale drawing ops
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2.2;     // base width
+    ctx.strokeStyle = '#111827'; // neutral ink
+    redraw();
+  }
+
+  function redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // redraw all strokes
+    for (const s of strokes) drawStroke(s);
+    if (currentStroke.length) drawStroke(currentStroke);
+    updateAcceptState();
+  }
+
+  function drawStroke(stroke) {
+    if (stroke.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(stroke[0].x, stroke[0].y);
+    for (let i = 1; i < stroke.length; i++) {
+      ctx.lineTo(stroke[i].x, stroke[i].y);
+    }
+    ctx.stroke();
+  }
+
+  function getPos(evt) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (evt.clientX ?? (evt.touches && evt.touches[0].clientX)) - rect.left;
+    const y = (evt.clientY ?? (evt.touches && evt.touches[0].clientY)) - rect.top;
+    return { x, y };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    currentStroke = [];
+    const p = getPos(e);
+    currentStroke.push(p);
+    redraw();
+  }
+
+  function moveDraw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = getPos(e);
+    currentStroke.push(p);
+    redraw();
+  }
+
+  function endDraw(e) {
+    if (!drawing) return;
+    drawing = false;
+    if (currentStroke.length > 0) {
+      strokes.push(currentStroke);
+      currentStroke = [];
+      redraw();
+    }
+  }
+
+  // Event wiring (pointer + touch + mouse)
+  canvas.addEventListener('pointerdown', startDraw);
+  canvas.addEventListener('pointermove', moveDraw);
+  window.addEventListener('pointerup', endDraw);
+  // Fallbacks for older browsers
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', moveDraw);
+  window.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive:false });
+  canvas.addEventListener('touchmove', moveDraw,   { passive:false });
+  canvas.addEventListener('touchend', endDraw);
+
+  // Controls
+  clearBtn.addEventListener('click', () => {
+    strokes = [];
+    currentStroke = [];
+    redraw();
+  });
+
+  undoBtn.addEventListener('click', () => {
+    strokes.pop();
+    redraw();
+  });
+
+  // Enable/disable Accept
+  function hasSignature() {
+    // Consider at least one stroke with > 1 point as a valid signature
+    return strokes.some(s => s.length > 1);
+  }
+  function hasName() {
+    return (nameInput.value || '').trim().length >= 3;
+  }
+  function updateAcceptState() {
+    acceptBtn.disabled = !(hasName() && hasSignature());
+  }
+
+  nameInput.addEventListener('input', updateAcceptState);
+
+  // Handle Accept
+  acceptBtn.addEventListener('click', () => {
+    if (acceptBtn.disabled) return;
+
+    // Export PNG dataURL
+    const dataURL = canvas.toDataURL('image/png');
+    sigDataInput.value = dataURL;
+
+    // Example payload
+    const payload = {
+      fullName: nameInput.value.trim(),
+      signatureDataURL: dataURL,
+      signedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    };
+
+    // OPTIONAL: hand off to your app (e.g., script.js can define window.onNDASigned)
+    if (typeof window.onNDASigned === 'function') {
+      window.onNDASigned(payload);
+    }
+
+    // Close modal (you may already have logic elsewhere)
+    modal.style.display = 'none';
+  });
+
+  // Handle Cancel
+  if (declineBtn) {
+    declineBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+
+  // Refit canvas whenever modal is shown or window resizes
+  const ro = new ResizeObserver(fitCanvas);
+  ro.observe(canvas);
+
+  // If you have a function that opens the NDA modal, call fitCanvas() after it becomes visible.
+  // As a safety, run once after load too:
+  window.addEventListener('load', fitCanvas);
+})();
+</script>
+
+<script>
+        
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>

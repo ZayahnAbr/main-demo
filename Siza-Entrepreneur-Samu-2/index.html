@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siza Innovator</title>
+  <link rel="stylesheet" href="style.css"/>
+  
+<style>
+  /* Header (keeps your color theme) */
+  header {
+    background: #156079;
+    color: #fff;
+    padding: 0.75rem 0;
+  }
+
+  .header-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap; /* allow brand + nav to wrap on small screens */
+  }
+
+  .brand {
+    font-weight:800;
+    color:#fff;
+    text-decoration:none;
+    line-height:1;
+    white-space:nowrap; /* stops the word from breaking */
+  }
+
+  /* NAV LAYOUT */
+  .site-nav {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    flex:1 1 auto;         /* nav can shrink/grow */
+    min-width:300px;       /* prevents ultra-squish */
+  }
+
+  .site-nav ul {
+    display:flex;
+    list-style:none;
+    gap:0.85rem;
+    margin:0;
+    padding:0;
+    align-items:center;
+    flex-wrap:nowrap;      /* important: prevent random wrapping on desktop */
+  }
+
+  .site-nav .left { flex-wrap:nowrap; }
+  .site-nav .right { flex-wrap:nowrap; }
+
+  .site-nav a {
+    color:#fff;
+    text-decoration:none;
+    font-weight:500;
+    padding:.25rem .3rem;  /* click-target without making rows taller */
+    transition:color .2s ease, opacity .2s ease;
+    line-height:1.2;
+    display:inline-block;
+  }
+
+  .site-nav a:hover { color:#00b4d8; }
+  .site-nav a.active { border-bottom:2px solid #00b4d8; }
+
+  .nav-avatar {
+    width:32px; height:32px; border-radius:50%; object-fit:cover;
+    display:none; margin-left:.25rem; border:2px solid rgba(255,255,255,.25);
+  }
+
+  /* SMALL SCREENS — stack nav neatly under brand */
+  @media (max-width: 900px) {
+    .header-row { row-gap:.5rem; }
+    .site-nav {
+      flex-basis:100%;
+      order:2;
+      flex-direction:column;
+      align-items:flex-start;  /* left align lists */
+      gap:.5rem;
+    }
+    .site-nav ul {
+      flex-wrap:wrap;          /* allow wrapping on small screens only */
+      gap:.6rem .9rem;
+    }
+    .site-nav .right { margin-left:0; }
+  }
+
+  /* Auth cards (kept from your version) */
+  .auth-grid {
+    display:grid;
+    gap:2rem;
+    grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+    margin-top:2rem;
+  }
+  form.card {
+    background:#fff;
+    padding:1.5rem;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  }
+  form.card h3 {
+    margin:0 0 1rem;
+    font-size:1.2rem;
+    color:#0d1b2a;
+  }
+  form.card label {
+    display:block;
+    margin:.75rem 0 .25rem;
+    font-size:.9rem;
+    color:#333;
+  }
+  form.card input, form.card select {
+    width:100%;
+    padding:.6rem;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:.95rem;
+  }
+  form.card button {
+    margin-top:1rem;
+    width:100%;
+    padding:.75rem;
+    border:0;
+    border-radius:6px;
+    background:#00b4d8;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .2s ease;
+  }
+  form.card button:hover { background:#0096c7; }
+  #googleSignInBtn { background:#fff; color:#444; border:1px solid #ccc; }
+  #googleSignInBtn:hover { background:#f8f8f8; }
+
+/* header content on the LEFT */
+header .container{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start !important;
+}
+
+/* Brand + icon */
+.brand{ margin-left:0 !important; }
+.brand{ display:flex; align-items:center; gap:.55rem; color:#fff; font-weight:700; text-decoration:none; }
+.icon-bulb-cute{ width:1.35em; height:1.35em; filter:drop-shadow(0 0 3px rgba(255,255,255,.55)); }
+
+
+</style>
+
+</head>
+<header class="site-header">
+  <div class="container header-row">
+<a class="brand" href="index.html" aria-label="Siza Entrepreneur">
+  <svg class="icon-bulb-cute" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+    <g stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- rays -->
+      <path d="M12 1.2v2.2M3.8 7l1.5 1.5M20.2 7l-1.5 1.5M2 12h2.2M19.8 12H22M7 20.6l1-1M17 19.6l-1-1"/>
+      <!-- bulb -->
+      <path d="M12 3a7 7 0 0 1 7 7c0 2.3-1 4.3-2.8 5.9-.9.8-1.4 1.7-1.5 2.6H9.3c-.1-.9-.6-1.8-1.5-2.6A7.6 7.6 0 0 1 5 10a7 7 0 0 1 7-7z"/>
+      <!-- cute base -->
+      <path d="M9 18h6M10.5 21h3"/>
+      <!-- little highlight -->
+      <path d="M9.5 8.8c.7-1.2 2-2 3.5-2.1" />
+    </g>
+  </svg>
+  <span>Siza Entrepreneur</span>
+</a>
+</header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Connecting Vision with Capital.</h2>
+      <p>Your idea deserves to be heard — pitch it, fund it, grow it.</p>
+   <a href="#auth" class="btn" id="getStartedBtn">Get Started</a>
+      <script>
+  document.getElementById('getStartedBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();                 // stop the #auth jump
+    window.location.href = 'user.html'; // go to your page
+  });
+</script>
+    </div>
+  </section>
+<!-- ===== Moving Ideas Reel ===== -->
+<section class="ideas-reel" aria-label="Community ideas and moments">
+  <div class="reel-mask">
+    <ul class="reel-track" id="reelTrack">
+      <!-- Use your real images/videos later. These placeholders work offline. -->
+
+   <!-- NEW: WhatsApp Micro-CRM for Spazas -->
+<li class="tile">
+  <div class="tile-image">
+    <span class="badge orange">Installer-Ready</span>
+    <img alt="installers" src="images/e1.png" />
+  </div>
+  <div class="keyline"></div>
+  <div class="meta"><span class="dot"></span><span>AI • Solar • Electronics</span></div>
+  <p class="description">
+    This business generates leads for accredited solar and inverter installers. You assess homes, measure the DB box, provide quotes, and pass qualified jobs to installers, earning 5–8% commission per installation.
+  </p>
+</li>
+
+<li class="tile">
+  <div class="tile-image">
+    <span class="badge orange">WhatsApp CRM</span>
+    <img alt="WhatsApp Micro-CRM for Spazas" src="images/spaza.png" />
+  </div>
+  <div class="keyline"></div>
+  <div class="meta"><span class="dot"></span><span>Mobility • WhatsApp • Retail</span></div>
+  <p class="description">
+    Simple WhatsApp bot for orders, specials, and digital loyalty stamps. Spaza owners pay
+    <strong>R149–R299/mo</strong> for one inbox, auto-replies, and broadcasts. Startup <strong>R5k–R8k</strong>.
+  </p>
+</li>
+
+<!-- NEW: Taxi & Car Wash + Detailing (subscriptions) -->
+<li class="tile">
+  <div class="tile-image">
+    <span class="badge green">Clean Touch</span>
+    <img alt="Taxi & Car Wash + Detailing" src="images/carwash.png" />
+  </div>
+  <div class="keyline"></div>
+  <div class="meta"><span class="dot"></span><span>Services • Transport </span></div>
+  <p class="description">
+    Hand-wash + monthly interior detail for taxis, e-hailing, and fleets. Startup <strong>R8k–R20k</strong>.
+    Price <strong>R70/wash</strong>; consumables ~R12 → ~R58 gross; aim ~20/day → ~R1 400 gross/day (pre-rent/labour).
+  </p>
+</li>
+<!-- Tech: QR Smart Menu & Ordering -->
+<li class="tile"
+    data-industries="Food Service,Hospitality,Events,MarTech,Payments">
+  <div class="tile-image">
+    <span class="badge blue">No App Needed</span>
+    <img alt="QR Smart Menu & Ordering" src="images/noapp.png" />
+  </div>
+  <div class="keyline"></div>
+  <div class="meta">
+    <span class="dot"></span>
+    <span> Food Service • Tech • Events  </span>
+  </div>
+  <p class="description">
+    QR menu + quick ordering + WhatsApp reorders. Vendors pay <strong>R99–R249/mo</strong>.
+    Startup <strong>R3k–R7k</strong> (menu generator, printer, basic site). Upsell: combos, promos, tips.
+  </p>
+</li>
+
+<!-- AI: Tender & Grant Scanner -->
+<li class="tile"
+    data-industries="Construction,NGOs,SMB Services,GovTech,Professional Services">
+  <div class="tile-image">
+    <span class="badge orange">NGO Focus</span>
+    <img alt="AI Tender & Grant Scanner" src="images/grant.png" />
+  </div>
+  <div class="keyline"></div>
+  <div class="meta">
+    <span class="dot"></span>
+    <span> Construction • NGOs • GovTech</span>
+  </div>
+  <p class="description">
+    Daily WhatsApp digest of matching tenders/grants + AI draft proposals.
+    Clients pay <strong>R199–R599/mo</strong>. Startup <strong>R8k–R20k</strong>. Filters by sector & region.
+  </p>
+</li>
+
+    </ul>
+  </div>
+</section>
+
+
+  <!-- AUTH SECTION -->
+  <section id="auth" class="container" style="margin: 2rem auto; max-width: 1100px;">
+    <div class="auth-grid">
+      <!-- LOGIN -->
+      <form id="loginForm" class="card" autocomplete="on">
+        <h3>Log in</h3>
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" required autocomplete="username email" />
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" placeholder="••••••••" required autocomplete="current-password" />
+        <button type="submit" class="btn">Log in</button>
+        <button type="button" id="googleSignInBtn">Continue with Google</button>
+      </form>
+
+      <!-- SIGN UP -->
+      <form id="signupForm" class="card" autocomplete="on">
+        <h3>Create account</h3>
+        <label for="signupName">Full name</label>
+        <input id="signupName" type="text" placeholder="Your name" required autocomplete="name" />
+        <label for="signupEmail">Email</label>
+        <input id="signupEmail" type="email" placeholder="you@example.com" required autocomplete="email" />
+        <label for="signupPassword">Password</label>
+        <input id="signupPassword" type="password" placeholder="Min 6 characters" required autocomplete="new-password" />
+        <label for="accountType">Account type</label>
+        <select id="accountType" required>
+          <option value="" disabled selected>Choose one</option>
+          <option value="entrepreneur">Entrepreneur</option>
+          <option value="investor">Investor</option>
+        </select>
+        <button type="submit" class="btn">Sign up</button>
+      </form>
+    </div>
+  </section>
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+<script>
+  // Make the reel loop seamlessly by duplicating its children once.
+  (function () {
+    const track = document.getElementById('reelTrack');
+    if (!track) return;
+    track.innerHTML += track.innerHTML; // duplicate once
+
+    // Respect reduced motion + tweak speed by viewport
+    const mqReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mqReduced.matches) {
+      track.style.animationDuration = '0s'; // stop animation for accessibility
+      return;
+    }
+    if (window.innerWidth >= 1200) track.style.animationDuration = '36s';
+    if (window.innerWidth <= 420)  track.style.animationDuration = '44s';
+  })();
+</script>
+
+  <!-- Firebase app -->
+   <script>
+(function () {
+  function getRole() {
+    return (
+      (window.currentUser && (window.currentUser.role || window.currentUser.accountType)) ||
+      localStorage.getItem("siza_user_role") ||
+      localStorage.getItem("accountType") ||
+      sessionStorage.getItem("siza_user_role") ||
+      sessionStorage.getItem("accountType") ||
+      ""
+    ).toLowerCase().trim();
+  }
+
+  function destFor(role) {
+    if (role === "investor") return "investor-dashboard.html";
+    if (role === "entrepreneur" || role === "entreprenuer") return "entrepreneur-dashboard.html";
+    return null; // unknown → keep #auth
+  }
+
+  const btn = document.getElementById("getStartedBtn");
+  if (!btn) return;
+
+  // Set initial href based on any cached role
+  (function primeHref() {
+    const d = destFor(getRole());
+    btn.setAttribute("href", d || "#auth");
+  })();
+
+  // Always decide at click time too (in case role changed)
+  btn.addEventListener("click", function (e) {
+    let role = getRole();
+
+    // If still unknown, try the select on this page
+    if (!role) {
+      const sel = document.getElementById("accountType");
+      if (sel && sel.value) role = sel.value.toLowerCase().trim();
+    }
+
+    const dest = destFor(role);
+    if (dest) {
+      e.preventDefault();
+      try {
+        localStorage.setItem("siza_user_role", role);
+        localStorage.setItem("accountType", role);
+      } catch {}
+      window.location.href = dest;
+    }
+    // else: no role yet → default #auth behaviour
+  });
+})();
+</script>
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
+<script src="script.merged.js"></script>
+<form id="loginForm">
+  <input id="loginEmail" ...>
+  <input id="loginPassword" type="password" ...>
+  <button type="submit">Login</button>
+</form>
+
+<button id="googleSignInBtn">Continue with Google</button>

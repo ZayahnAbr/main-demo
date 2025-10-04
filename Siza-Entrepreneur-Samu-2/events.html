@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Events - Siza</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+  <section class="dashboard-section">
+    <div class="container">
+      <h2>Upcoming Events & Webinars</h2>
+<!-- WAHED 2025 (Hybrid) -->
+<div class="idea-card">
+  <div class="card-head">
+    <span class="badge">Hybrid • Free</span>
+    <h3>World Access to Higher Education Day Conference 2025</h3>
+  </div>
+
+  <!-- Banner image -->
+  <div class="media image">
+    <img
+      src="https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1096587343%2F2045385953453%2F1%2Foriginal.20250815-101220?w=940&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C0%2C4500%2C2250&s=16f4c2ef7a21104787139ccfcfd46a3c"
+      alt="WAHED 2025 Conference banner"
+      loading="lazy"
+    />
+  </div>
+
+  <p>📅 Tue, 28 Oct 2025 &nbsp;|&nbsp; 🕒 09:30–17:00 SAST</p>
+  <p>🌐 Online &nbsp;•&nbsp; 🏫 University of the Western Cape, Robert Sobukwe Rd, Bellville, Cape Town</p>
+
+  <p>
+    The world’s largest annual international event dedicated to equitable access to and success in higher education.
+    Themed <em>“Opportunity, Innovation and Lifelong Learning.”</em>
+  </p>
+
+  <div class="cta-row">
+    <a class="btn" href="#" aria-disabled="true">Register Now</a>
+  </div>
+</div>
+
+       <!-- AWIEF 2025 — Women & DEI -->
+<div class="idea-card">
+  <div class="card-head">
+    <span class="badge">Women • DEI</span>
+    <h3>AWIEF 2025 — Africa’s Women Entrepreneurs & DEI Summit</h3>
+  </div>
+
+  <div class="media">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/MiwF0kp-pig"
+      title="AWIEF 2025 — Promo"
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    ></iframe>
+  </div>
+  <p>🌍 Cape Town &nbsp;|&nbsp; Join <strong>1000+ leaders</strong> from <strong>50+ countries</strong></p>
+  <p>
+    Be part of Africa’s largest gathering of women entrepreneurs and DEI advocates.
+    Network, learn, and grow at <strong>AWIEF 2025</strong> in Cape Town.
+  </p>
+  <div class="cta-row">
+    <a class="btn" href="#" aria-disabled="true">Register Now</a>
+  </div>
+</div>
+
+      <!-- AFEST (Africa Tech Festival) -->
+<div class="idea-card featured">
+  <div class="card-head">
+    <span class="badge">Coming Soon</span>
+    <h3>AFEST — Africa Tech Festival Networking Night</h3>
+  </div>
+
+  <div class="media">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/CGSpMBu8_7o"
+      title="AFEST — Africa Tech Festival"
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+    ></iframe>
+  </div>
+
+  <p>📅 Tuesday, 11 Nov 2025 &nbsp;|&nbsp; 📍 Grand Africa Café & Beach</p>
+  <p>
+    An UNFORGETTABLE evening of music, entertainment, and high-energy networking
+    with thousands of attendees, plus a stacked lineup of performers, fun features,
+    and activities.
+  </p>
+  <div class="cta-row">
+    <a class="btn outline" href="#" aria-disabled="true">Tickets opening soon</a>
+  </div>
+</div>
+  </section>
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+
+    <!-- chat popup html -->
+  <div class="chat-toggle" onclick="toggleChat()">
+    💬 Messages
+  </div>
+
+  <div class="chat-box" id="chatBox">
+    <div class="chat-header">
+      <span>Messages</span>
+      <button onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages">
+      <div class="message">
+        <strong>Investor Alex:</strong>
+        <p>Hi! Let's connect about your pitch.</p>
+      </div>
+        <div class="message me">
+        <strong>You:</strong>
+        <p>Sounds great! When are you available?</p>
+      </div>
+    </div>
+    <form class="chat-input" onsubmit="sendMessage(event)">
+      <input type="text" id="chatInput" placeholder="Type a message..." />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <!-- chat script -->
+  <script>
+    function toggleChat() {
+      const chatBox = document.getElementById('chatBox');
+      chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const messageText = input.value.trim();
+      if (messageText !== '') {
+        const chatMessages = document.querySelector('.chat-messages');
+        const newMessage = document.createElement('div');
+        newMessage.classList.add('message', 'me');
+        newMessage.innerHTML = `<strong>You:</strong><p>${messageText}</p>`;
+        chatMessages.appendChild(newMessage);
+        input.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+  </script>
+  <script type="module" src="script.js"></script>
+</body>
+ <script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>

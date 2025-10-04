@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siza Innovator - Submit Your Pitch</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+ <div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+  <section class="form-section">
+    <div class="container">
+      <h2>Submit Your Pitch</h2>
+      <form>
+        <label for="business-name">Business Name</label>
+        <input id="business-name" type="text" placeholder="e.g. SolarBloom" required />
+
+        <label for="industry">Industry</label>
+        <select id="industry" required>
+          <option value="">Select Industry</option>
+          <option>Technology</option>
+          <option>Health</option>
+          <option>Energy</option>
+        </select>
+
+        <label for="description">Pitch Description</label>
+        <textarea id="description" rows="6" placeholder="Describe your idea..." required></textarea>
+
+        <label for="video-link">Pitch Video Link</label>
+        <input id="video-link" type="url" placeholder="https://example.com/pitch.mp4" />
+
+        <label for="files">Upload Files</label>
+        <input id="files" type="file" multiple />
+
+        <button type="submit" class="btn">Submit Pitch</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+  <!-- chat popup html -->
+  <div class="chat-toggle" onclick="toggleChat()">
+    💬 Messages
+  </div>
+
+  <div class="chat-box" id="chatBox">
+    <div class="chat-header">
+      <span>Messages</span>
+      <button onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages">
+      <div class="message">
+        <strong>Investor Alex:</strong>
+        <p>Hi! Let's connect about your pitch.</p>
+      </div>
+        <div class="message me">
+        <strong>You:</strong>
+        <p>Sounds great! When are you available?</p>
+      </div>
+    </div>
+    <form class="chat-input" onsubmit="sendMessage(event)">
+      <input type="text" id="chatInput" placeholder="Type a message..." />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <!-- chat script -->
+  <script>
+    function toggleChat() {
+      const chatBox = document.getElementById('chatBox');
+      chatBox.style.display = chatBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const messageText = input.value.trim();
+      if (messageText !== '') {
+        const chatMessages = document.querySelector('.chat-messages');
+        const newMessage = document.createElement('div');
+        newMessage.classList.add('message', 'me');
+        newMessage.innerHTML = `<strong>You:</strong><p>${messageText}</p>`;
+        chatMessages.appendChild(newMessage);
+        input.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+  </script>
+<script type="module" src="script.js"></script>
+
+</body>
+<script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>

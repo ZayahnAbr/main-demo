@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources Management - Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="admin-dashboard.html">← Back to Dashboard</a>
+        <a href="index.html">Home</a>
+        <a href="#" id="nav-logout">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Resources Management</h1>
+                <p>Manage all uploaded resources and files</p>
+            </div>
+            <div class="count-badge" id="resourcesCount">
+                Loading...
+            </div>
+        </div>
+        
+        <div class="resources-container" id="resourcesContainer">
+            <div class="loading">Loading resources...</div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

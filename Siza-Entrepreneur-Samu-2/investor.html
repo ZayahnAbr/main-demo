@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siza - Investor Profile</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .row { display:flex; gap:2rem; align-items:center; flex-wrap:wrap; }
+    .badge { background:#ffd700; color:#111; border-radius:999px; padding:.2rem .6rem; font-size:.8rem; margin-left:.5rem; display:inline-block; }
+    .profile-skeleton { padding:2rem 0; }
+    .skel-line { height:12px; background:#eee; border-radius:6px; margin:.5rem 0; width:100%; max-width:420px; }
+    .skel-avatar { width:120px; height:120px; border-radius:50%; background:#eee; }
+  </style>
+</head>
+
+<!-- IMPORTANT: data-profile="investor" enables dynamic rendering in script.js -->
+<body data-profile="investor">
+  <div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+  <section class="profile-section">
+    <div class="container">
+
+      <!-- Loading skeleton (shown while Firestore loads) -->
+      <div class="profile-skeleton">
+        <div class="row">
+          <div class="skel-avatar"></div>
+          <div style="flex:1; max-width:500px;">
+            <div class="skel-line" style="width:60%"></div>
+            <div class="skel-line" style="width:40%"></div>
+            <div class="skel-line" style="width:30%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real content (script.js toggles visibility) -->
+      <div class="profile-main" style="display:none;">
+        <div class="profile-header">
+          <img id="profAvatar" src="" alt="Profile Picture" class="profile-img">
+          <div>
+            <h2 id="profName">— <span id="goldBadge" class="badge" style="display:none;">Gold</span></h2>
+            <p><span id="profRole">Investor</span> | <span id="profLocation">—</span></p>
+          </div>
+        </div>
+
+        <div class="profile-content">
+          <h3>About</h3>
+          <p id="invBio">—</p>
+
+          <div class="card-grid" style="margin:1rem 0;">
+            <div class="card">
+              <strong>Focus Area:</strong>
+              <div id="invFocus">—</div>
+            </div>
+            <div class="card">
+              <strong>Budget:</strong>
+              <div id="invBudget">—</div>
+            </div>
+          </div>
+          <!-- You can extend this with saved pitches, recent activity, etc. -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+
+  <!-- Load your dynamic logic (must be a module for Firebase imports) -->
+  <script type="module" src="script.js"></script>
+</body>
+<script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>

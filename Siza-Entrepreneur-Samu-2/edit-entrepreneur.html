@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Siza Innovator – Edit Entrepreneur Profile</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+  <!-- Edit Form -->
+  <section class="form-section">
+    <div class="container" style="max-width:900px;">
+      <h2>Entrepreneur Profile</h2>
+      <p>Tell investors about you and your venture. Upload a profile image, your pitch deck and (optionally) a short pitch video. Saving will mark your profile as complete and send you to the finish screen.</p>
+
+      <form id="editEntrepreneurForm" class="card" style="margin-top:1rem;">
+        <!-- Profile Picture preview -->
+        <div class="profile-pic-preview">
+          <img id="entProfilePreview" src="" alt="Profile Preview" />
+        </div>
+
+        <label for="entProfilePic">Profile Picture</label>
+        <input id="entProfilePic" type="file" accept="image/*" />
+
+        <label for="entName">Full Name</label>
+        <input id="entName" type="text" placeholder="Your full name" required />
+
+        <label for="entBio">Bio</label>
+        <textarea id="entBio" rows="4" placeholder="Who you are and what you’re building" required></textarea>
+
+        <div class="filter-bar">
+          <div style="flex:1; min-width:220px;">
+            <label for="entIndustry">Industry</label>
+            <select id="entIndustry" required>
+              <option value="" disabled selected>Select industry</option>
+              <option value="Fintech">Fintech</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Energy">Energy</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="Agriculture">Agriculture</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div style="flex:1; min-width:220px;">
+            <label for="entLocation">Location</label>
+            <input id="entLocation" type="text" placeholder="City, Country" required />
+          </div>
+        </div>
+
+        <label for="entWebsite">Website (optional)</label>
+        <input id="entWebsite" type="url" placeholder="https://yourstartup.com" />
+
+        <hr style="margin:1.25rem 0; border:none; border-top:1px solid #eee;" />
+
+        <h3 style="margin:0 0 .5rem;">Pitch Details</h3>
+
+        <label for="entPitchTitle">Pitch Title</label>
+        <input id="entPitchTitle" type="text" placeholder="e.g., Affordable Solar Storage for Rural Homes" required />
+
+        <label for="entFundingGoal">Funding Goal </label>
+        <input id="entFundingGoal" type="number" min="0" step="100" placeholder="50000" required />
+
+        <div class="filter-bar">
+          <div style="flex:1; min-width:220px;">
+            <label for="entPitchDeck">Pitch Deck (PDF/PPT)</label>
+            <input id="entPitchDeck" type="file" accept=".pdf,.ppt,.pptx" />
+          </div>
+          <div style="flex:1; min-width:220px;">
+            <label for="entPitchVideo">Pitch Video (optional)</label>
+            <input id="entPitchVideo" type="file" accept="video/*" />
+          </div>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top:1rem;">Save Profile</button>
+        <p style="margin-top:.75rem; color:#666; font-size:.95rem;">
+          After saving, you’ll be taken to the <strong>Profile Complete</strong> page and can proceed to your dashboard.
+        </p>
+      </form>
+    </div>
+  </section>
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+  <script type="module" src="script.js"></script>
+</body>
+<script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+
+</html>

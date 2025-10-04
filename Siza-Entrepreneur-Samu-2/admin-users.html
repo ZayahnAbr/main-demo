@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="admin-dashboard.html">← Back to Dashboard</a>
+        <a href="index.html">Home</a>
+        <a href="#" id="nav-logout">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>User Management</h1>
+                <p>Manage all platform users and their roles</p>
+            </div>
+            <div class="count-badge" id="usersCount">
+                Loading...
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Profile Complete</th>
+                        <th>Joined Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="6" class="loading">Loading users...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

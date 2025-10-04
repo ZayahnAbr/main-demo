@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entrepreneur Dashboard - Siza</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+ <div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+
+<main>
+  <section class="dashboard-section">
+    <div class="container">
+      <img id="profilePic" src="" alt="Profile Picture" class="profile-img">
+      <h2>Welcome back, <span id="username">User</span> 👋</h2>
+
+      <!-- ===== PITCH SUBMISSION FORM ===== -->
+      <div class="idea-card">
+        <h3>Submit a New Pitch</h3>
+        <form id="pitchForm">
+          <label for="pitchTitle">Business name</label>
+          <small class="form-help">This will be the official name of your business displayed to investors.</small>
+          <input type="text" id="pitchTitle" placeholder="Enter your business Name" required /><br />
+          
+
+          <label for="shortPitch">Short Pitch</label>
+          <small class="form-help">A brief summary (1-2 sentences) that highlights your business idea. This how you're supposed to grab your investors attention! Make these few sentences count! </small>
+          <textarea id="shortPitch" placeholder="Enter the short Pitch (shown to investors)" required maxlength="200"></textarea><br />
+
+          <label for="pitchDescription">Detailed Description</label>
+          <small class="form-help">Provide a detailed explanation of your business, goals, and unique value proposition. Include all the important details that capture the essence of your business idea.</small>
+          <textarea id="pitchDescription" placeholder="Enter the Long Pitch / Description (NDA required)" required></textarea><br />
+
+
+      <!-- INDUSTRY SELECTION - checkboxes (2-column compact grid) -->
+<l/p>Select up to 5 industries</p>
+ <small class="form-help">What industry does your business fall under?</small>
+<!-- optional selection counter (insert right below) -->
+<div class="selection-counter" id="industrySelectionCount">Selected: 0 / 5</div>
+<div id="entIndustry" class="checkbox-grid" role="list">
+  <!-- First 4 visible checkboxes -->
+  <label class="checkbox-item"><input type="checkbox" value="Technology"> Technology</label>
+  <label class="checkbox-item"><input type="checkbox" value="Financial Technology (Fintech)"> Financial Technology (Fintech)</label>
+  <label class="checkbox-item"><input type="checkbox" value="Health & Wellness"> Health & Wellness</label>
+  <label class="checkbox-item"><input type="checkbox" value="Biotechnology & Life Sciences"> Biotechnology & Life Sciences</label>
+
+  <!-- Remaining industries hidden initially -->
+  <label class="checkbox-item hidden"><input type="checkbox" value="Education"> Education</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="E-commerce & Retail"> E-commerce & Retail</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Food & Beverage"> Food & Beverage</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Agriculture & Agritech"> Agriculture & Agritech</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Energy & CleanTech"> Energy & CleanTech</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Real Estate & PropTech"> Real Estate & PropTech</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Transport & Logistics"> Transport & Logistics</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Music, Film & Entertainment"> Music, Film & Entertainment</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Tourism & Hospitality"> Tourism & Hospitality</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Manufacturing & Industrial"> Manufacturing & Industrial</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Consumer Products"> Consumer Products</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Social Impact / Nonprofit"> Social Impact / Nonprofit</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Creative & Design"> Creative & Design</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Artificial Intelligence (AI) & Data Science"> AI & Data Science</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Cybersecurity"> Cybersecurity</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Mining & Natural Resources"> Mining & Natural Resources</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Enterprise Software & SaaS"> Enterprise Software & SaaS</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Gaming & Esports"> Gaming & Esports</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Sports & Fitness"> Sports & Fitness</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Telecommunications"> Telecommunications</label>
+  <label class="checkbox-item hidden"><input type="checkbox" value="Other/Emerging Fields"> Other/Emerging Fields</label>
+
+  <!-- See More Button -->
+  <button id="showMoreBtn" class="btn-small">See More</button>
+  <button id="hideBtn" class="btn-small hidden">Hide</button>
+
+</div>
+
+ <!-- FINANCIAL PROJECTIONS SECTION -->
+<div class="card">
+  <h3>Financial Projections (ZAR)</h3>
+  <p>Please provide estimates for the next 3 years. Values must be in South African Rand (ZAR).</p>
+
+  <form id="financialProjectionsForm" class="projections-form">
+
+    <!-- Revenue -->
+    <h4>Revenue Projections</h4>
+    <label>Year 1 Revenue (ZAR): <input type="number" id="revYear1" required /></label>
+    <label>Year 2 Revenue (ZAR): <input type="number" id="revYear2" required /></label>
+    <label>Year 3 Revenue (ZAR): <input type="number" id="revYear3" required /></label>
+
+    <!-- Expenses -->
+    <h4>Expenses Projections</h4>
+    <label>Year 1 Expenses (ZAR): <input type="number" id="expYear1" required /></label>
+    <label>Year 2 Expenses (ZAR): <input type="number" id="expYear2" required /></label>
+    <label>Year 3 Expenses (ZAR): <input type="number" id="expYear3" required /></label>
+
+    <!-- Profit -->
+    <h4>Profit / Net Income</h4>
+    <label>Year 1 Profit (ZAR): <input type="number" id="profYear1" required /></label>
+    <label>Year 2 Profit (ZAR): <input type="number" id="profYear2" required /></label>
+    <label>Year 3 Profit (ZAR): <input type="number" id="profYear3" required /></label>
+
+    <!-- Growth & Investment -->
+    <h4>Growth & Investment</h4>
+    <label>Expected Annual Growth Rate (%): <input type="number" id="growthRate" required /></label>
+    <label>Planned Use of Investment:
+      <textarea id="investmentUse" placeholder="e.g. Product development, hiring, marketing" required></textarea>
+    </label>
+
+    <!-- Explanation -->
+    <h4>Validation of Projections</h4>
+    <label>How did you arrive at these numbers?
+      <textarea id="projectionBasis" placeholder="e.g. market research, competitor data, pipeline" required></textarea>
+    </label>
+  </form>
+</div>
+
+
+
+          <label for="pitchImage">Upload an image (optional):</label>
+          <label for="pitchImage">Accepted file types(.jpg, .jpeg, .png)</label>
+          <input type="file" id="pitchImage" accept="image/*" /><br />
+          <img id="pitchImagePreview" src="" alt="Image preview" style="max-width: 300px; margin-top: 10px; display: none;" /><br />
+
+          <label for="ytUrl">Pitch video (YouTube – set to Unlisted)</label>
+          <small class="form-help">Paste a YouTube link (watch / youtu.be / shorts). We’ll auto-embed.</small>
+          <input id="ytUrl" type="url" placeholder="https://youtu.be/abc123… or https://www.youtube.com/watch?v=abc123">
+
+<!-- Live preview -->
+<div id="ytPreview" class="video-16x9" style="display:none;margin-top:10px;"></div>
+
+
+          <button type="submit" class="btn">Submit Pitch</button>
+        </form>
+      </div>
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+
+<!-- ===== FIREBASE + AUTH LOGIC ===== -->
+<script type="module">
+import { db, storage, getStoredUser, submitPitch, logout } from './auth.js';
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+  const user = getStoredUser();
+  if (!user) return window.location.href = "login.html";
+
+  // dynamic nav
+  const navUl = document.querySelector("header nav ul");
+  navUl.innerHTML = `
+    <li><a href="${user.accountType === 'investor' ? 'investor-dashboard.html' : 'entrepreneur-dashboard.html'}">Home</a></li>
+    <li><a href="messages.html">Messages</a></li>
+    <li><a href="resources.html">Resources</a></li>
+    <li><a href="events.html">Events</a></li>
+    <li><a href="forum.html">Forum</a></li>
+    <li><a href="deal-room.html">Deal Room</a></li>
+    <li><a href="edit-${user.accountType}.html">Profile</a></li>
+    <li><a href="#" id="logoutBtn">Logout</a></li>
+  `;
+
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+
+  // fill user info
+  document.getElementById("username").textContent = user.name || "User";
+  if(user.profilePic) document.getElementById("profilePic").src = user.profilePic;
+
+  // pitch submission
+  const pitchForm = document.getElementById("pitchForm");
+  const imageInput = document.getElementById("pitchImage");
+  const imagePreview = document.getElementById("pitchImagePreview");
+  const videoInput = document.getElementById("pitchVideo");
+  const videoPreview = document.getElementById("pitchVideoPreview");
+
+  imageInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if(file){
+      const reader = new FileReader();
+      reader.onload = ()=> { imagePreview.src = reader.result; imagePreview.style.display="block"; }
+      reader.readAsDataURL(file);
+    } else { imagePreview.style.display="none"; }
+  });
+
+  videoInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if(file){ videoPreview.src = URL.createObjectURL(file); videoPreview.style.display="block"; }
+    else videoPreview.style.display="none";
+  });
+
+pitchForm.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const title = document.getElementById("pitchTitle").value.trim();
+  const shortPitch = document.getElementById("shortPitch").value.trim();
+  const description = document.getElementById("pitchDescription").value.trim();
+  const financialProjections = document.getElementById("financialProjections").value.trim();
+  if (!title || !shortPitch || !description || !financialProjections) {
+    return alert("Fill all fields.");
+  }
+
+  // collect selected industries (checkboxes inside #entIndustry)
+  const checkedBoxes = Array.from(document.querySelectorAll('#entIndustry input[type="checkbox"]:checked'));
+  const industries = checkedBoxes.map(cb => cb.value.trim()).filter(v => v);
+
+  if (industries.length === 0) {
+    return alert("Please select at least one industry (max 5).");
+  }
+  if (industries.length > 5) {
+    return alert("Please select no more than 5 industries.");
+  }
+
+  try {
+    const files = {};
+    if (imageInput.files[0]) files.image = imageInput.files[0];
+    if (videoInput.files[0]) files.video = videoInput.files[0];
+
+    // Build pitch data with industries array
+    const pitchData = {
+      title,
+      shortPitch,
+      description,
+      financialProjections,
+      industries,                 // <<< IMPORTANT: array of tags
+      timestamp: serverTimestamp()
+      // plus any other fields you need (entrepreneurId, etc.)
+    };
+
+    await submitPitch(pitchData, files);
+
+    alert("Pitch submitted successfully!");
+    pitchForm.reset();
+    imagePreview.style.display = "none";
+    videoPreview.style.display = "none";
+
+    // reset selection UI (remove selected class, update counter)
+    document.querySelectorAll('#entIndustry .checkbox-item.selected').forEach(el => el.classList.remove('selected'));
+    document.getElementById('industrySelectionCount').textContent = `Selected: 0 / 5`;
+
+  } catch (err) {
+    console.error(err);
+    alert("Error submitting pitch.");
+  }
+});
+
+});
+</script>
+<script type="module" src="script.js"></script>
+
+<!-- Custom Warning Popup -->
+<div id="warningPopup" class="warning-popup">
+  <div class="popup-content">
+    <p id="warningMessage">You can select a maximum of 5 industries.</p>
+    <button id="closeWarning" class="btn">OK</button>
+  </div>
+</div>
+
+
+</body>
+<script>
+        // This will load when the page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            loadMyPitches(); // Load only YOUR pitches
+        });
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        const host = document.getElementById("navbar-placeholder");
+        host.innerHTML = html;
+
+        // now that navbar exists, wire up behavior
+        if (typeof avatarDropdown === "function") avatarDropdown();
+        if (typeof markActiveNav === "function") markActiveNav();
+        if (typeof hydrateNavbar === "function") hydrateNavbar(window.currentUser);
+      });
+  });
+</script>
+</html>
+
+

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Messages - Siza</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    fetch("navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbar-placeholder").innerHTML = html;
+        if (typeof hydrateNavbar === "function" && window.currentUser) {
+          hydrateNavbar(window.currentUser);
+        }
+      });
+  });
+</script>
+  <section class="form-section">
+    <div class="container">
+      <h2>Messages</h2>
+      
+      <!-- Back button and chat container -->
+      <button id="backToPitch" class="back-btn">← Back</button>
+      <div class="chat-container">
+        <div class="chat-header">
+          <h3 id="chatWithName">Chat with...</h3>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <!-- Messages will be loaded dynamically -->
+        </div>
+        <div class="chat-input">
+          <input type="text" id="messageInput" placeholder="Type your message...">
+          <button id="sendMessageBtn">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
+
+
+

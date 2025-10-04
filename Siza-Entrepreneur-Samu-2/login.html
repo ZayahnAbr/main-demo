@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Siza</title>
+  <link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+ <header class="site-header">
+  <div class="container header-row">
+    <a class="brand" href="index.html" aria-label="Siza Entrepreneur">
+  <svg class="icon-bulb-cute" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+    <g stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- rays -->
+      <path d="M12 1.2v2.2M3.8 7l1.5 1.5M20.2 7l-1.5 1.5M2 12h2.2M19.8 12H22M7 20.6l1-1M17 19.6l-1-1"/>
+      <!-- bulb -->
+      <path d="M12 3a7 7 0 0 1 7 7c0 2.3-1 4.3-2.8 5.9-.9.8-1.4 1.7-1.5 2.6H9.3c-.1-.9-.6-1.8-1.5-2.6A7.6 7.6 0 0 1 5 10a7 7 0 0 1 7-7z"/>
+      <!-- cute base -->
+      <path d="M9 18h6M10.5 21h3"/>
+      <!-- little highlight -->
+      <path d="M9.5 8.8c.7-1.2 2-2 3.5-2.1" />
+    </g>
+  </svg>
+  <span>Siza Entrepreneur</span>
+</a>
+    <nav class="site-nav">
+      </ul>
+    </nav>
+  </div>
+</header>
+
+  <!-- Login Form -->
+  <section class="register-section">
+    <h2>Log In</h2>
+    <form id="loginForm">
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" name="loginEmail" autocomplete="email" required />
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" name="loginPassword" autocomplete="current-password" required />
+
+      <button class="btn" type="submit">Log In</button>
+    </form>
+
+    <button id="googleSignInBtn" class="google-btn" type="button">Sign in with Google</button>
+
+    <div class="extra-links" style="text-align: center; margin-top: 1rem;">
+      <p>Don't have an account? <a href="register.html">Register here</a></p>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+  <div class="container footer-content">
+    <p>
+      Siza means ‘help’—connecting vision with capital. This page is operated by Siza.
+    </p>
+    <p>
+      Siza is a registered entity in South Africa. All operations comply with local financial and regulatory requirements.
+    </p>
+    <p>
+      Email: <a href="mailto:info@siza.com">info@siza.com</a> | &copy; 2025 Siza. All rights reserved.
+    </p>
+    <p>
+      This website uses cookies.
+    </p>
+  </div>
+</footer>
+  <!-- Firebase login logic -->
+  <script type="module" src="script.js"></script>
+  <form id="loginForm">
+  <input id="loginEmail" ...>
+  <input id="loginPassword" type="password" ...>
+  <button type="submit">Login</button>
+</form>
+
+<button id="googleSignInBtn">Continue with Google</button>
+
+</body>
+
+</html>

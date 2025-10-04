@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitches Management - Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="admin-dashboard.html">← Back to Dashboard</a>
+        <a href="index.html">Home</a>
+        <a href="#" id="nav-logout">Logout</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Pitches Management</h1>
+                <p>Manage all business pitches submitted by entrepreneurs</p>
+            </div>
+            <div class="count-badge" id="pitchesCount">
+                Loading...
+            </div>
+        </div>
+        
+        <div class="pitches-container" id="pitchesContainer">
+            <div class="loading">Loading pitches...</div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
