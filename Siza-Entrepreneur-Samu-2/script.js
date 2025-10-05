@@ -1894,8 +1894,6 @@ async function loadPitchesIntoGrid() {
     grid.innerHTML = `<div class="card">Could not load pitches: ${err.message}</div>`;
   }
 }
-
-// Dedicated function: wires up the NDA modal and its action buttons.
 function setupNDAModal(grid) {
   const modal = document.getElementById("ndaModal");
   if (!modal) {
@@ -1912,6 +1910,7 @@ function setupNDAModal(grid) {
   }
 
   console.log("Setting up NDA modal");
+  
   let selectedPitchId = null;
 
   // ------- helpers -------
@@ -2190,6 +2189,7 @@ function setupNDAModal(grid) {
     _replace(href);
   };
 })();
+
 
 
 
@@ -2755,12 +2755,13 @@ function setAuthUI(u, { skipRedirect = false } = {}) {
     updateNavForUser(u);
     applyAvatarImages(u);
 
-    if (!skipRedirect && isIndexPage()) {
-      const dash = u.accountType === "investor"
-        ? "investor-dashboard.html"
-        : "entrepreneur-dashboard.html";
-      window.location.replace(`${dash}?uid=${encodeURIComponent(u.id)}`);
-    }
+    if (!skipRedirect && isIndexPage() && (window.auth?.currentUser)) {
+  const dash = u.accountType === "investor"
+    ? "investor-dashboard.html"
+    : "entrepreneur-dashboard.html";
+  window.location.replace(`${dash}?uid=${encodeURIComponent(u.id)}`);
+}
+
   } else {
     if (authSection) authSection.style.display = "";
     if (navLogin)    navLogin.style.display    = "";
